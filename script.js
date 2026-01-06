@@ -18,48 +18,64 @@ function timeRemaining(endDate) {
 }
 
 fetch("events.json")
-    .then(response => {
-        if (!response.ok) {
-            throw new Error("Failed to load events.json");
-        }
-        return response.json();
-    })
+    .then(res => res.json())
     .then(events => {
         const today = new Date();
-        const eventsByGame = {};
+        const games = {};
 
         events.forEach(event => {
             const eventEnd = new Date(event.endDate);
             if (eventEnd < today) return;
 
-            if (!eventsByGame[event.game]) {
-                eventsByGame[event.game] = [];
+            if (!games[event.game]) {
+                games[event.game] = {
+                    cover: event.cover,
+                    events: []
+                };
             }
-            eventsByGame[event.game].push(event);
+
+            games[event.game].events.push(event);
         });
 
-        for (const game in eventsByGame) {
-            const gameSection = document.createElement("div");
-            gameSection.className = "game-section";
-            gameSection.innerHTML = `<h2>${game}</h2>`;
+        for (const gameName in games) {
+            const section = document.createElement("div");
+            section.className = "game-section collapsed";
 
-            eventsByGame[game].forEach(event => {
-                const eventCard = document.createElement("div");
-                eventCard.className = "event-card";
+            const header = document.createElement("div");
+            header.className = "game-header";
 
-                eventCard.innerHTML = `
+            header.innerHTML = `
+                <img src="${games[gameName].cover}" alt="${gameName}">
+                <h2>${gameName}</h2>
+                <span class="toggle-arrow">▼</span>
+            `;
+
+            const eventsWrapper = document.createElement("div");
+            eventsWrapper.className = "game-events";
+
+            games[gameName].events.forEach(event => {
+                const card = document.createElement("div");
+                card.className = "event-card";
+
+                card.innerHTML = `
                     <h3>${event.title}</h3>
                     <p>Type: ${event.type}</p>
                     <p>Ends in ${timeRemaining(event.endDate)}</p>
                 `;
 
-                gameSection.appendChild(eventCard);
+                eventsWrapper.appendChild(card);
             });
 
-            eventsContainer.appendChild(gameSection);
+            header.addEventListener("click", () => {
+                section.classList.toggle("collapsed");
+            });
+
+            section.appendChild(header);
+            section.appendChild(eventsWrapper);
+            eventsContainer.appendChild(section);
         }
     })
-    .catch(error => {
-        console.error(error);
+    .catch(err => {
+        console.error(err);
         eventsContainer.innerHTML = "<p>Failed to load events.</p>";
     });
