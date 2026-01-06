@@ -1,18 +1,21 @@
 [
     {
         "game": "Fortnite",
+        "cover": "https://upload.wikimedia.org/wikipedia/en/0/0e/FortniteLogo.svg",
         "title": "Winterfest Skins",
         "type": "Skin",
         "endDate": "2026-01-07"
     },
     {
         "game": "Fortnite",
+        "cover": "https://upload.wikimedia.org/wikipedia/en/0/0e/FortniteLogo.svg",
         "title": "Christmas Challenges",
         "type": "Event",
         "endDate": "2026-01-05"
     },
     {
         "game": "The Finals",
+        "cover": "https://upload.wikimedia.org/wikipedia/en/6/6e/The_Finals_Logo.png",
         "title": "Twitch Drops",
         "type": "Drop",
         "endDate": "2026-01-09"
