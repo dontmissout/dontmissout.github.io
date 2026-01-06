@@ -17,23 +17,20 @@ function timeRemaining(endDate) {
     return `${hours}h ${minutes}m`;
 }
 
-
 fetch("events.json")
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Failed to load events.json");
+        }
+        return response.json();
+    })
     .then(events => {
+        const today = new Date();
         const eventsByGame = {};
 
-        const today = new Date();
-
-events.forEach(event => {
-    const eventEnd = new Date(event.endDate);
-    if (eventEnd < today) return;
-
-    if (!eventsByGame[event.game]) {
-        eventsByGame[event.game] = [];
-    }
-    eventsByGame[event.game].push(event);
-});
+        events.forEach(event => {
+            const eventEnd = new Date(event.endDate);
+            if (eventEnd < today) return;
 
             if (!eventsByGame[event.game]) {
                 eventsByGame[event.game] = [];
@@ -63,10 +60,6 @@ events.forEach(event => {
         }
     })
     .catch(error => {
-        console.error("Failed to load events:", error);
+        console.error(error);
         eventsContainer.innerHTML = "<p>Failed to load events.</p>";
     });
-
-setInterval(() => {
-    location.reload();
-}, 60000);
