@@ -1,23 +1,31 @@
 [
     {
         "game": "Fortnite",
-        "cover": "https://upload.wikimedia.org/wikipedia/en/0/0e/FortniteLogo.svg",
+        "cover": "images/fortnite.jpg",
         "title": "Winterfest Skins",
         "type": "Skin",
-        "endDate": "2026-01-07"
+        "endDate": "2027-01-07"
     },
     {
         "game": "Fortnite",
-        "cover": "https://upload.wikimedia.org/wikipedia/en/0/0e/FortniteLogo.svg",
+        "cover": "images/siege.png",
         "title": "Christmas Challenges",
         "type": "Event",
-        "endDate": "2026-01-05"
+        "endDate": "2027-01-08"
     },
     {
         "game": "The Finals",
-        "cover": "https://upload.wikimedia.org/wikipedia/en/6/6e/The_Finals_Logo.png",
+        "cover": "images/thefinals.jpg",
         "title": "Twitch Drops",
         "type": "Drop",
-        "endDate": "2026-01-09"
+        "endDate": "2027-01-09"
+    },
+    {
+        "game": "Rainbow Six Siege X",
+        "cover": "images/siege.png",
+        "title": "Twitch Drops",
+        "type": "Drop",
+        "endDate": "2027-01-09"
     }
 ]
+
