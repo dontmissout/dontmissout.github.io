@@ -26,6 +26,14 @@
         "title": "Twitch Drops",
         "type": "Drop",
         "endDate": "2027-01-09"
-    }
+    },
+    {
+        "game": "Valorant",
+        "cover": "images/valorant.png",
+        "title": "Holiday Player Cards",
+        "type": "Cosmetic",
+        "endDate": "2026-01-06"
+  }
 ]
+
 
