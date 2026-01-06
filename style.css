@@ -34,3 +34,35 @@ p {
     padding: 15px;
     border-radius: 10px;
 }
+.game-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.game-header img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+}
+
+.toggle-arrow {
+    font-size: 1.2rem;
+    margin-left: auto;
+    transition: transform 0.2s ease;
+}
+
+.game-section.collapsed .toggle-arrow {
+    transform: rotate(-90deg);
+}
+
+.game-events {
+    margin-top: 10px;
+}
+
+.game-section.collapsed .game-events {
+    display: none;
+}
+
