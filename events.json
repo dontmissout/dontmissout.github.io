@@ -1,0 +1,20 @@
+[
+    {
+        "game": "Fortnite",
+        "title": "Winterfest Skins",
+        "type": "Skin",
+        "endDate": "2026-01-07"
+    },
+    {
+        "game": "Fortnite",
+        "title": "Christmas Challenges",
+        "type": "Event",
+        "endDate": "2026-01-05"
+    },
+    {
+        "game": "The Finals",
+        "title": "Twitch Drops",
+        "type": "Drop",
+        "endDate": "2026-01-09"
+    }
+]
