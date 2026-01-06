@@ -16,3 +16,10 @@ h1 {
     background: #1e293b;
     border-radius: 10px;
 }
+.event-card {
+    margin-top: 20px;
+    padding: 20px;
+    background: #334155;
+    border-radius: 12px;
+}
+
