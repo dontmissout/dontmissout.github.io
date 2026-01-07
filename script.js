@@ -1,66 +1,57 @@
 console.log("Website loaded successfully!");
 
 fetch("events.json")
-  .then(response => response.json())
-  .then(data => {
+  .then(res => res.json())
+  .then(events => {
     const container = document.getElementById("games-container");
+    if (!container) return;
 
     const games = {};
 
-    data.forEach(event => {
-      if (!games[event.game]) {
-        games[event.game] = [];
-      }
-      games[event.game].push(event);
+    events.forEach(e => {
+      if (!games[e.game]) games[e.game] = [];
+      games[e.game].push(e);
     });
 
-    for (const game in games) {
+    Object.keys(games).forEach(game => {
       const section = document.createElement("section");
-      section.className = "game-section";
 
       const header = document.createElement("div");
       header.className = "game-header";
-
       header.innerHTML = `
-        <img src="${games[game][0].cover}" alt="${game}">
+        <img src="${games[game][0].cover}">
         <h2>${game}</h2>
         <span class="arrow">▶</span>
       `;
 
-      const eventsDiv = document.createElement("div");
-      eventsDiv.className = "events hidden";
+      const list = document.createElement("div");
+      list.className = "events hidden";
 
-      games[game].forEach(event => {
-        const daysLeft = getDaysRemaining(event.endDate);
+      games[game].forEach(ev => {
+        const days = getDaysLeft(ev.endDate);
+        if (days < 0) return;
 
-        if (daysLeft < 0) return; // hide expired events
-
-        const eventDiv = document.createElement("div");
-        eventDiv.className = "event";
-
-        eventDiv.innerHTML = `
-          <h3>${event.title}</h3>
-          <p>Type: ${event.type}</p>
-          <p class="countdown">Ends in: ${daysLeft} days</p>
+        const item = document.createElement("div");
+        item.className = "event";
+        item.innerHTML = `
+          <h3>${ev.title}</h3>
+          <p>${ev.type}</p>
+          <p class="countdown">Ends in: ${days} days</p>
         `;
-
-        eventsDiv.appendChild(eventDiv);
+        list.appendChild(item);
       });
 
-      header.addEventListener("click", () => {
-        eventsDiv.classList.toggle("hidden");
+      header.onclick = () => {
+        list.classList.toggle("hidden");
         header.querySelector(".arrow").classList.toggle("open");
-      });
+      };
 
-      section.appendChild(header);
-      section.appendChild(eventsDiv);
+      section.append(header, list);
       container.appendChild(section);
-    }
-  });
+    });
+  })
+  .catch(err => console.error("ERROR:", err));
 
-function getDaysRemaining(endDate) {
-  const now = new Date();
-  const end = new Date(endDate);
-  const diff = end - now;
-  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+function getDaysLeft(date) {
+  return Math.ceil((new Date(date) - new Date()) / 86400000);
 }
