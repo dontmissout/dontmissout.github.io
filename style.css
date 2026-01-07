@@ -71,14 +71,23 @@ p {
     display: none;
 }
 .game-section {
-  margin: 20px 0;
+  margin-bottom: 32px;
 }
 
 .game-header {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+
+  transition: background 0.2s ease;
+}
+
+.game-header:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.game-header h2 {
+  font-size: 1.25rem;
 }
 
 .game-header img {
@@ -90,15 +99,27 @@ p {
 
 .arrow {
   margin-left: auto;
-  transition: transform 0.2s ease;
+  transition: transform 0.25s ease;
+  opacity: 0.8;
 }
 
 .arrow.open {
   transform: rotate(90deg);
 }
 
-.events.hidden {
-  display: none;
+
+.events {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition:
+    max-height 0.35s ease,
+    opacity 0.25s ease;
+}
+
+.events:not(.hidden) {
+  max-height: 1000px;
+  opacity: 1;
 }
 
 .event {
@@ -108,23 +129,36 @@ p {
 }
 
 .countdown {
+  margin-top: 6px;
+  font-weight: 600;
   color: #4fd1c5;
-  font-weight: bold;
 }
-.countdown {
-  font-weight: bold;
-  color: #4fd1c5;
+
+.event.ending-soon {
+  border-left-color: #f87171;
 }
 
 .event.ending-soon .countdown {
   color: #f87171;
 }
-
 .event {
-  margin: 12px 0;
-  padding: 10px 20px;
-  border-left: 2px solid #444;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin: 12px 0 12px 20px;
+  border-left: 3px solid #4fd1c5;
+
+  transition: 
+    transform 0.2s ease,
+    background 0.2s ease;
 }
+
+.event:hover {
+  transform: translateX(4px);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+
 
 
 
