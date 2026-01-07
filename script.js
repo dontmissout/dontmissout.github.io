@@ -115,8 +115,3 @@ function getTimeRemaining(endDate) {
     minutes: Math.floor((diff / 60000) % 60)
   };
 }
-
-<body>
-  <div id="games-container"></div>
-  <script src="script.js"></script>
-</body>
