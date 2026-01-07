@@ -1,59 +1,80 @@
-console.log("Website loaded successfully!");
+const SUBMISSIONS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR76r__p7DDeh0CKE8pXB1Z1xDKXAkbtdauoyL4aYyeDrXQkbiOyojWIGl4WTxwcbdf4BaMtJ-FwPm9/pub?gid=0&single=true&output=csv";
+const GAMES_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR76r__p7DDeh0CKE8pXB1Z1xDKXAkbtdauoyL4aYyeDrXQkbiOyojWIGl4WTxwcbdf4BaMtJ-FwPm9/pub?gid=623150298&single=true&output=csv";
 
-let allEvents = [];
+let gamesMap = {};
+let submissions = [];
 
-fetch("events.json")
-  .then(res => res.json())
-  .then(events => {
-    allEvents = events;
-    renderEvents();
-    setInterval(renderEvents, 60000); // update every minute
-  })
-  .catch(err => console.error(err));
+Promise.all([
+  fetch(GAMES_URL).then(res => res.text()),
+  fetch(SUBMISSIONS_URL).then(res => res.text())
+]).then(([gamesCSV, subsCSV]) => {
+  gamesMap = parseCSV(gamesCSV, "games");
+  submissions = parseCSV(subsCSV, "submissions");
+  renderEvents();
+  setInterval(renderEvents, 60000);
+});
+
+function parseCSV(csv, type) {
+  const lines = csv.trim().split("\n");
+  const headers = lines.shift().split(",");
+
+  return lines.map(line => {
+    const values = line.split(",");
+    const obj = {};
+    headers.forEach((h, i) => obj[h.trim()] = values[i]?.trim());
+    return obj;
+  });
+}
 
 function renderEvents() {
   const container = document.getElementById("games-container");
   container.innerHTML = "";
 
-  const games = {};
+  const grouped = {};
 
-  allEvents.forEach(e => {
-    if (!games[e.game]) games[e.game] = [];
-    games[e.game].push(e);
+  submissions.forEach(e => {
+    if (e.approved !== "TRUE") return;
+    if (!gamesMap[e.game_key]) return;
+
+    const game = gamesMap[e.game_key];
+    const remaining = getTimeRemaining(e.end_datetime_utc);
+    if (remaining.total <= 0) return;
+
+    if (!grouped[e.game_key]) {
+      grouped[e.game_key] = {
+        display_name: game.display_name,
+        cover: game.cover_image,
+        events: []
+      };
+    }
+
+    grouped[e.game_key].events.push({ ...e, remaining });
   });
 
-  Object.keys(games).forEach(game => {
+  Object.values(grouped).forEach(game => {
     const section = document.createElement("section");
 
     const header = document.createElement("div");
     header.className = "game-header";
     header.innerHTML = `
-      <img src="${games[game][0].cover}">
-      <h2>${game}</h2>
+      <img src="${game.cover}">
+      <h2>${game.display_name}</h2>
       <span class="arrow">▶</span>
     `;
 
     const list = document.createElement("div");
     list.className = "events hidden";
 
-    games[game].forEach(ev => {
-      const remaining = getTimeRemaining(ev.endDate);
-      if (remaining.total <= 0) return;
-
+    game.events.forEach(ev => {
       const item = document.createElement("div");
       item.className = "event";
 
-      if (remaining.total < 86400000 * 3) {
-        item.classList.add("ending-soon");
-      }
-
       item.innerHTML = `
-        <h3>${ev.title}</h3>
+        <h3>${ev.event_title}</h3>
         <p>${ev.type}</p>
         <p class="countdown">
-        Ends in: ${remaining.days}d ${remaining.hours}h ${remaining.minutes}m
+          Ends in: ${ev.remaining.days}d ${ev.remaining.hours}h ${ev.remaining.minutes}m
         </p>
-
       `;
 
       list.appendChild(item);
@@ -67,29 +88,16 @@ function renderEvents() {
     section.append(header, list);
     container.appendChild(section);
   });
+}
+
 function getTimeRemaining(endDate) {
-  const now = new Date();
-  const end = new Date(endDate);
-  const diff = end - now;
-
-  if (diff <= 0) {
-    return { total: 0 };
-  }
-
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-  const minutes = Math.floor((diff / (1000 * 60)) % 60);
-  const seconds = Math.floor((diff / 1000) % 60);
+  const diff = new Date(endDate) - new Date();
+  if (diff <= 0) return { total: 0 };
 
   return {
     total: diff,
-    days,
-    hours,
-    minutes,
-    seconds
+    days: Math.floor(diff / 86400000),
+    hours: Math.floor((diff / 3600000) % 24),
+    minutes: Math.floor((diff / 60000) % 60)
   };
 }
-
-}
-
-
