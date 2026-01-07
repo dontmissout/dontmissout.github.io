@@ -49,8 +49,8 @@
   "endDate": "2027-01-15"
 },
 {
-  "game": "Overwatch",
-  "cover": "images/overwatch2.png",
+  "game": "Overwatch 2",
+  "cover": "images/overwatch.png",
   "title": "Winter Event Skins",
   "type": "Skin",
   "endDate": "2027-01-10"
@@ -85,6 +85,7 @@
 }
 
 ]
+
 
 
 
