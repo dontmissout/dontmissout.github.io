@@ -1,3 +1,4 @@
+#type can be either: event, gamemode, stream drops, skin,
 [
     {
         "game": "Fortnite",
@@ -23,7 +24,7 @@
     {
         "game": "Rainbow Six Siege X",
         "cover": "images/siege.png",
-        "title": "Twitch Drops",
+        "title": "Daily Rewards",
         "type": "Drop",
         "endDate": "2027-01-09"
     },
@@ -33,8 +34,16 @@
         "title": "Holiday Player Cards",
         "type": "Cosmetic",
         "endDate": "2027-01-06"
-  }
+  },
+    {
+        "game": "Apex Legends",
+        "cover": "images/apex.jpg",
+        "title": "New Year quests",
+        "type": "Cosmetic",
+        "endDate": "2027-01-06"
+  },
 ]
+
 
 
 
