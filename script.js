@@ -51,8 +51,9 @@ function renderEvents() {
         <h3>${ev.title}</h3>
         <p>${ev.type}</p>
         <p class="countdown">
-          Ends in: ${remaining.days}d ${remaining.hours}h ${remaining.minutes}m
+        Ends in: ${remaining.days}d ${remaining.hours}h ${remaining.minutes}m
         </p>
+
       `;
 
       list.appendChild(item);
@@ -90,4 +91,5 @@ function getTimeRemaining(endDate) {
 }
 
 }
+
 
