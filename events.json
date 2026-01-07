@@ -42,7 +42,51 @@
         "type": "Cosmetic",
         "endDate": "2027-01-06"
   },
+    {
+  "game": "Call of Duty",
+  "cover": "images/cod.png",
+  "title": "Season Crossover Skins",
+  "type": "Cosmetic",
+  "endDate": "2027-01-15"
+},
+{
+  "game": "Overwatch 2",
+  "cover": "images/overwatch2.png",
+  "title": "Winter Event Skins",
+  "type": "Skin",
+  "endDate": "2027-01-10"
+},
+{
+  "game": "Rocket League",
+  "cover": "images/rocketleague.png",
+  "title": "Limited Event Decals",
+  "type": "Cosmetic",
+  "endDate": "2027-01-08"
+},
+{
+  "game": "League of Legends",
+  "cover": "images/lol.png",
+  "title": "Event Pass Rewards",
+  "type": "Pass",
+  "endDate": "2027-01-20"
+},
+{
+  "game": "CS2",
+  "cover": "images/cs2.png",
+  "title": "Operation Weapon Skins",
+  "type": "Drop",
+  "endDate": "2027-02-01"
+},
+{
+  "game": "Destiny 2",
+  "cover": "images/destiny2.png",
+  "title": "Seasonal Ornaments",
+  "type": "Cosmetic",
+  "endDate": "2027-01-18"
+}
+
 ]
+
 
 
 
