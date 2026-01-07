@@ -1,7 +1,7 @@
 [
     {
   "game": "Don't Miss Out!",
-  "cover": "images/",
+  "cover": "images/favicon.ico",
   "title": "",
   "type": "",
   "startDate": "",
@@ -16,7 +16,7 @@
         "type": "Skin",
         "startDate": "2024-12-15",
         "endDate": "2027-01-10T00:00:00Z",
-        "source": "https://twitter.com/FortniteGame"
+        
     },
     {
         "game": "Fortnite",
@@ -97,6 +97,7 @@
 }
 
 ]
+
 
 
 
