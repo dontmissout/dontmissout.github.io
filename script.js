@@ -7,23 +7,40 @@ let submissions = [];
 Promise.all([
   fetch(GAMES_URL).then(res => res.text()),
   fetch(SUBMISSIONS_URL).then(res => res.text())
-]).then(([gamesCSV, subsCSV]) => {
-  gamesMap = parseCSV(gamesCSV, "games");
-  submissions = parseCSV(subsCSV, "submissions");
+])
+.then(([gamesCSV, subsCSV]) => {
+  gamesMap = mapGames(parseCSV(gamesCSV));
+  submissions = parseCSV(subsCSV);
   renderEvents();
   setInterval(renderEvents, 60000);
+})
+.catch(err => {
+  console.error("FETCH ERROR:", err);
 });
 
-function parseCSV(csv, type) {
+function parseCSV(csv) {
   const lines = csv.trim().split("\n");
   const headers = lines.shift().split(",");
 
   return lines.map(line => {
     const values = line.split(",");
     const obj = {};
-    headers.forEach((h, i) => obj[h.trim()] = values[i]?.trim());
+    headers.forEach((h, i) => {
+      obj[h.trim()] = values[i]?.trim();
+    });
     return obj;
   });
+}
+
+function mapGames(rows) {
+  const map = {};
+  rows.forEach(g => {
+    map[g.game_key] = {
+      display_name: g.display_name,
+      cover_image: g.cover_image
+    };
+  });
+  return map;
 }
 
 function renderEvents() {
@@ -36,14 +53,13 @@ function renderEvents() {
     if (e.approved !== "TRUE") return;
     if (!gamesMap[e.game_key]) return;
 
-    const game = gamesMap[e.game_key];
     const remaining = getTimeRemaining(e.end_datetime_utc);
     if (remaining.total <= 0) return;
 
     if (!grouped[e.game_key]) {
       grouped[e.game_key] = {
-        display_name: game.display_name,
-        cover: game.cover_image,
+        name: gamesMap[e.game_key].display_name,
+        cover: gamesMap[e.game_key].cover_image,
         events: []
       };
     }
@@ -58,7 +74,7 @@ function renderEvents() {
     header.className = "game-header";
     header.innerHTML = `
       <img src="${game.cover}">
-      <h2>${game.display_name}</h2>
+      <h2>${game.name}</h2>
       <span class="arrow">▶</span>
     `;
 
@@ -68,7 +84,6 @@ function renderEvents() {
     game.events.forEach(ev => {
       const item = document.createElement("div");
       item.className = "event";
-
       item.innerHTML = `
         <h3>${ev.event_title}</h3>
         <p>${ev.type}</p>
@@ -76,7 +91,6 @@ function renderEvents() {
           Ends in: ${ev.remaining.days}d ${ev.remaining.hours}h ${ev.remaining.minutes}m
         </p>
       `;
-
       list.appendChild(item);
     });
 
