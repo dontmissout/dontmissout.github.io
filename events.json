@@ -97,8 +97,8 @@
 }
 
 ]
-document.getElementById("last-updated").textContent =
-  "Last updated: " + new Date().toLocaleDateString();
+
+
 
 
 
