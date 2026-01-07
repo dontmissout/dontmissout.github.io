@@ -1,4 +1,3 @@
-#type can be either: event, gamemode, stream drops, skin,
 [
     {
         "game": "Fortnite",
@@ -86,6 +85,7 @@
 }
 
 ]
+
 
 
 
