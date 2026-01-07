@@ -1,10 +1,22 @@
 [
     {
+  "game": "",
+  "cover": "images/",
+  "title": "",
+  "type": "",
+  "startDate": "",
+  "endDate": "",
+  "source": ""
+}
+
+    {
         "game": "Fortnite",
         "cover": "images/fortnite.jpg",
         "title": "Winterfest Skins",
         "type": "Skin",
-        "endDate": "2027-01-07"
+        "startDate": "2024-12-15",
+        "endDate": "2027-01-07",
+        "source": "https://twitter.com/FortniteGame"
     },
     {
         "game": "Fortnite",
@@ -85,6 +97,9 @@
 }
 
 ]
+document.getElementById("last-updated").textContent =
+  "Last updated: " + new Date().toLocaleDateString();
+
 
 
 
