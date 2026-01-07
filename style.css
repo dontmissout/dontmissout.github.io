@@ -111,6 +111,22 @@ p {
   color: #4fd1c5;
   font-weight: bold;
 }
+.countdown {
+  font-weight: bold;
+  color: #4fd1c5;
+}
+
+.event.ending-soon .countdown {
+  color: #f87171;
+}
+
+.event {
+  margin: 12px 0;
+  padding: 10px 20px;
+  border-left: 2px solid #444;
+}
+
+
 
 
 
