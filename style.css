@@ -65,4 +65,46 @@ p {
 .game-section.collapsed .game-events {
     display: none;
 }
+.game-section {
+  margin: 20px 0;
+}
+
+.game-header {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 12px;
+}
+
+.game-header img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.arrow {
+  margin-left: auto;
+  transition: transform 0.2s ease;
+}
+
+.arrow.open {
+  transform: rotate(90deg);
+}
+
+.events.hidden {
+  display: none;
+}
+
+.event {
+  padding: 10px 20px;
+  border-left: 2px solid #444;
+  margin-left: 20px;
+}
+
+.countdown {
+  color: #4fd1c5;
+  font-weight: bold;
+}
+
 
