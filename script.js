@@ -31,9 +31,9 @@ function getTimeRemaining(endDate) {
   return { total, days, hours, minutes, seconds };
 }
 
-function renderEvents() {}
+function renderEvents() {
   const container = document.getElementById("games");
-  container.innerHTML = "";
+  container.innerHTML = "";}
 
   const grouped = {};
 
@@ -86,4 +86,5 @@ function renderEvents() {}
         <h3>${ev.event_title}</h3>
         <p>${ev.type}</p>
         <p class="
+
 
