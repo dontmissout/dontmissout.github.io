@@ -12,7 +12,7 @@ function parseCSV(text) {
   const lines = text.trim().split("\n");
   const headers = lines.shift().split(",");
 
-  return lines.map(line => {
+  return lines.map((line) => {
     const values = line.split(",");
     const obj = {};
     headers.forEach((h, i) => {
@@ -40,7 +40,7 @@ function renderEvents() {
 
   const grouped = {};
 
-  submissions.forEach(e => {
+  submissions.forEach((e) => {
     if (e.approved !== "TRUE") return;
     if (!gamesMap[e.game_key]) return;
 
@@ -60,14 +60,14 @@ function renderEvents() {
       grouped[e.game_key] = {
         display_name: gamesMap[e.game_key].display_name,
         cover: gamesMap[e.game_key].cover_image,
-        events: []
+        events: [],
       };
     }
 
     grouped[e.game_key].events.push({ ...e, remaining });
   });
 
-  Object.values(grouped).forEach(game => {
+  Object.values(grouped).forEach((game) => {
     const section = document.createElement("section");
     section.className = "game-section";
 
@@ -77,11 +77,11 @@ function renderEvents() {
         <h2>${game.display_name}</h2>
       </div>
       <div class="events"></div>
-    `;
+    `; // ✅ closing backtick present
 
     const eventsDiv = section.querySelector(".events");
 
-    game.events.forEach(ev => {
+    game.events.forEach((ev) => {
       const el = document.createElement("div");
       el.className = "event-card";
 
@@ -95,24 +95,24 @@ function renderEvents() {
           ${ev.remaining.seconds}s
         </p>
         <small>Submitted by ${ev.submitted_by}</small>
-      `;
+      `; // ✅ closing backtick present
 
       eventsDiv.appendChild(el);
     });
 
     container.appendChild(section);
   });
-}
+} // ✅ closes renderEvents function
 
 // Fetch CSVs and initialize
 Promise.all([
-  fetch(GAMES_URL).then(r => r.text()),
-  fetch(SUBMISSIONS_URL).then(r => r.text())
+  fetch(GAMES_URL).then((r) => r.text()),
+  fetch(SUBMISSIONS_URL).then((r) => r.text()),
 ]).then(([gamesCSV, subsCSV]) => {
   const games = parseCSV(gamesCSV);
   submissions = parseCSV(subsCSV);
 
-  games.forEach(g => {
+  games.forEach((g) => {
     gamesMap[g.game_key] = g;
   });
 
@@ -121,7 +121,7 @@ Promise.all([
 });
 
 // Search input handling
-document.addEventListener("input", e => {
+document.addEventListener("input", (e) => {
   if (e.target.id === "searchInput") {
     searchQuery = e.target.value.toLowerCase();
     renderEvents();
