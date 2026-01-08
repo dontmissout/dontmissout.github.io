@@ -7,6 +7,7 @@ let gamesMap = {};
 let submissions = [];
 let searchQuery = "";
 
+// Parse CSV text into array of objects
 function parseCSV(text) {
   const lines = text.trim().split("\n");
   const headers = lines.shift().split(",");
@@ -21,6 +22,7 @@ function parseCSV(text) {
   });
 }
 
+// Calculate remaining time for countdowns
 function getTimeRemaining(endDate) {
   const total = new Date(endDate) - new Date();
   const seconds = Math.floor((total / 1000) % 60);
@@ -31,9 +33,10 @@ function getTimeRemaining(endDate) {
   return { total, days, hours, minutes, seconds };
 }
 
+// Render all events grouped by game
 function renderEvents() {
   const container = document.getElementById("games");
-  container.innerHTML = "";}
+  container.innerHTML = "";
 
   const grouped = {};
 
@@ -85,6 +88,42 @@ function renderEvents() {
       el.innerHTML = `
         <h3>${ev.event_title}</h3>
         <p>${ev.type}</p>
-        <p class="
+        <p class="countdown">
+          ${ev.remaining.days}d
+          ${ev.remaining.hours}h
+          ${ev.remaining.minutes}m
+          ${ev.remaining.seconds}s
+        </p>
+        <small>Submitted by ${ev.submitted_by}</small>
+      `;
 
+      eventsDiv.appendChild(el);
+    });
 
+    container.appendChild(section);
+  });
+}
+
+// Fetch CSVs and initialize
+Promise.all([
+  fetch(GAMES_URL).then(r => r.text()),
+  fetch(SUBMISSIONS_URL).then(r => r.text())
+]).then(([gamesCSV, subsCSV]) => {
+  const games = parseCSV(gamesCSV);
+  submissions = parseCSV(subsCSV);
+
+  games.forEach(g => {
+    gamesMap[g.game_key] = g;
+  });
+
+  renderEvents();
+  setInterval(renderEvents, 1000);
+});
+
+// Search input handling
+document.addEventListener("input", e => {
+  if (e.target.id === "searchInput") {
+    searchQuery = e.target.value.toLowerCase();
+    renderEvents();
+  }
+});
