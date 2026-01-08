@@ -57,8 +57,31 @@ function renderEvents() {
   const grouped = {};
 
   submissions.forEach(e => {
-    if (e.approved !== "TRUE") return;
-    if (!gamesMap[e.game_key]) return;
+  if (e.approved !== "TRUE") return;
+  if (!gamesMap[e.game_key]) return;
+
+  const searchText = `
+    ${gamesMap[e.game_key].display_name}
+    ${e.event_title}
+    ${e.type}
+    ${e.submitted_by}
+  `.toLowerCase();
+
+  if (searchQuery && !searchText.includes(searchQuery)) return;
+
+  const remaining = getTimeRemaining(e.end_datetime_utc);
+  if (remaining.total <= 0) return;
+
+  if (!grouped[e.game_key]) {
+    grouped[e.game_key] = {
+      display_name: gamesMap[e.game_key].display_name,
+      cover: gamesMap[e.game_key].cover_image,
+      events: []
+    };
+  }
+
+  grouped[e.game_key].events.push({ ...e, remaining });
+});
 
     const remaining = getTimeRemaining(e.end_datetime_utc);
     if (remaining.total <= 0) return;
@@ -130,6 +153,7 @@ function getTimeRemaining(endDate) {
     minutes: Math.floor((diff / 60000) % 60)
   };
 }
+
 
 
 
