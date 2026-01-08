@@ -64,40 +64,42 @@ function renderEvents() {
     grouped[e.game_key].events.push({ ...e, remaining });
   });
 
-  Object.values(grouped).forEach(game => {
-    const section = document.createElement("section");
-    section.className = "game-section";
+Object.values(grouped).forEach(game => {
+  const section = document.createElement("section");
+  section.className = "game-section";
 
-    section.innerHTML = `
-      <div class="game-header">
-        <img src="${game.cover}" alt="${game.display_name}">
-        <h2>${game.display_name}</h2>
-      </div>
-      <div class="events"></div>
+  section.innerHTML = `
+    <div class="game-header">
+      <img src="${game.cover}" alt="${game.display_name}">
+      <h2>${game.display_name}</h2>
+    </div>
+    <div class="events"></div>
+  `;
+
+  const eventsDiv = section.querySelector(".events");
+
+  game.events.forEach(ev => {
+    const el = document.createElement("div");
+    el.className = "event-card";
+
+    el.innerHTML = `
+      <h3>${ev.event_title}</h3>
+      <p>${ev.type}</p>
+      <p class="countdown">
+        ${ev.remaining.days}d
+        ${ev.remaining.hours}h
+        ${ev.remaining.minutes}m
+        ${ev.remaining.seconds}s
+      </p>
+      <small>Submitted by ${ev.submitted_by}</small>
     `;
 
-    const eventsDiv = section.querySelector(".events");
-
-    game.events.forEach(ev => {
-      const el = document.createElement("div");
-      el.className = "event-card";
-
-      el.innerHTML = `
-        <h3>${ev.event_title}</h3>
-        <p>${ev.type}</p>
-        <p class="countdown">
-          ${ev.remaining.days}d
-          ${ev.remaining.hours}h
-          ${ev.remaining.minutes}m
-          ${ev.remaining.seconds}s
-        </p>
-        <small>Submitted by ${ev.submitted_by}</small>
-      `;
-      eventsDiv.appendChild(el);
-    });
-
-    container.appendChild(section);
+    eventsDiv.appendChild(el);
   });
+
+  container.appendChild(section);
+});
+
 
 Promise.all([
   fetch(GAMES_URL).then(r => r.text()),
@@ -121,6 +123,7 @@ document.addEventListener("input", e => {
     renderEvents();
   }
 });
+
 
 
 
