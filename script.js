@@ -84,13 +84,21 @@ function renderEvents() {
     game.events.forEach(ev => {
       const item = document.createElement("div");
       item.className = "event";
-      item.innerHTML = `
-        <h3>${ev.event_title}</h3>
-        <p>${ev.type}</p>
-        <p class="countdown">
-          Ends in: ${ev.remaining.days}d ${ev.remaining.hours}h ${ev.remaining.minutes}m
-        </p>
-      `;
+      const sourceHTML = ev.source_link
+  ? `<a href="${ev.source_link}" target="_blank" rel="noopener">Source</a>`
+  : "";
+
+item.innerHTML = `
+  <h3>${ev.event_title}</h3>
+  <p>${ev.type}</p>
+  <p class="countdown">
+    Ends in: ${ev.remaining.days}d ${ev.remaining.hours}h ${ev.remaining.minutes}m
+  </p>
+  <div class="event-meta">
+    ${sourceHTML}
+    <span class="submitted-by">Submitted by: ${ev.submitted_by}</span>
+  </div>
+`;
       list.appendChild(item);
     });
 
@@ -115,3 +123,4 @@ function getTimeRemaining(endDate) {
     minutes: Math.floor((diff / 60000) % 60)
   };
 }
+
