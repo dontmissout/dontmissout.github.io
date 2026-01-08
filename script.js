@@ -96,7 +96,7 @@ function renderEvents() {
 
       eventsDiv.appendChild(el);
     });
-
+  }
     container.appendChild(section);
   });
 }
@@ -123,4 +123,5 @@ document.addEventListener("input", e => {
     renderEvents();
   }
 });
+
 
