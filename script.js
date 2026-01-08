@@ -71,13 +71,14 @@ function renderEvents() {
     const section = document.createElement("section");
     section.className = "game-section";
 
-    section.innerHTML = `
-      <div class="game-header">
-        <img src="${game.cover}" alt="${game.display_name}">
-        <h2>${game.display_name}</h2>
-      </div>
-      <div class="events"></div>
-    `; // ✅ closing backtick present
+section.innerHTML = `
+  <div class="game-header" data-toggle>
+    <img src="${game.cover}" alt="${game.display_name}">
+    <h2>${game.display_name}</h2>
+    <span class="arrow">▶</span>
+  </div>
+  <div class="events collapsed"></div>
+`;
 
     const eventsDiv = section.querySelector(".events");
 
@@ -104,6 +105,15 @@ function renderEvents() {
   });
 } // ✅ closes renderEvents function
 
+const header = section.querySelector("[data-toggle]");
+const eventsDiv = section.querySelector(".events");
+const arrow = section.querySelector(".arrow");
+
+header.addEventListener("click", () => {
+  eventsDiv.classList.toggle("collapsed");
+  arrow.classList.toggle("open");
+});
+
 // Fetch CSVs and initialize
 Promise.all([
   fetch(GAMES_URL).then((r) => r.text()),
@@ -127,3 +137,4 @@ document.addEventListener("input", (e) => {
     renderEvents();
   }
 });
+
