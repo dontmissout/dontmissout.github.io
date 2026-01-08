@@ -1,5 +1,6 @@
 const GAMES_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vR76r__p7DDeh0CKE8pXB1Z1xDKXAkbtdauoyL4aYyeDrXQkbiOyojWIGl4WTxwcbdf4BaMtJ-FwPm9/pub?gid=623150298&single=true&output=csv";
+
 const SUBMISSIONS_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vR76r__p7DDeh0CKE8pXB1Z1xDKXAkbtdauoyL4aYyeDrXQkbiOyojWIGl4WTxwcbdf4BaMtJ-FwPm9/pub?gid=0&single=true&output=csv";
 
@@ -7,12 +8,13 @@ let gamesMap = {};
 let submissions = [];
 let searchQuery = "";
 
-// Parse CSV text into array of objects
+/* ---------------- CSV PARSER ---------------- */
+
 function parseCSV(text) {
   const lines = text.trim().split("\n");
   const headers = lines.shift().split(",");
 
-  return lines.map((line) => {
+  return lines.map(line => {
     const values = line.split(",");
     const obj = {};
     headers.forEach((h, i) => {
@@ -22,25 +24,30 @@ function parseCSV(text) {
   });
 }
 
-// Calculate remaining time for countdowns
+/* ---------------- COUNTDOWN ---------------- */
+
 function getTimeRemaining(endDate) {
   const total = new Date(endDate) - new Date();
-  const seconds = Math.floor((total / 1000) % 60);
-  const minutes = Math.floor((total / 1000 / 60) % 60);
-  const hours = Math.floor((total / (1000 * 60 * 60)) % 24);
-  const days = Math.floor(total / (1000 * 60 * 60 * 24));
 
-  return { total, days, hours, minutes, seconds };
+  return {
+    total,
+    days: Math.floor(total / (1000 * 60 * 60 * 24)),
+    hours: Math.floor((total / (1000 * 60 * 60)) % 24),
+    minutes: Math.floor((total / (1000 * 60)) % 60),
+    seconds: Math.floor((total / 1000) % 60),
+  };
 }
 
-// Render all events grouped by game
+/* ---------------- RENDER ---------------- */
+
 function renderEvents() {
   const container = document.getElementById("games");
-  container.innerHTML = "";
+  if (!container) return;
 
+  container.innerHTML = "";
   const grouped = {};
 
-  submissions.forEach((e) => {
+  submissions.forEach(e => {
     if (e.approved !== "TRUE") return;
     if (!gamesMap[e.game_key]) return;
 
@@ -67,26 +74,33 @@ function renderEvents() {
     grouped[e.game_key].events.push({ ...e, remaining });
   });
 
-  Object.values(grouped).forEach((game) => {
+  Object.values(grouped).forEach(game => {
     const section = document.createElement("section");
     section.className = "game-section";
 
-section.innerHTML = `
-  <div class="game-header" data-toggle>
-    <img src="${game.cover}" alt="${game.display_name}">
-    <h2>${game.display_name}</h2>
-    <span class="arrow">▶</span>
-  </div>
-  <div class="events collapsed"></div>
-`;
+    section.innerHTML = `
+      <div class="game-header">
+        <img src="${game.cover}" alt="${game.display_name}">
+        <h2>${game.display_name}</h2>
+        <span class="arrow">▶</span>
+      </div>
+      <div class="events collapsed"></div>
+    `;
 
+    const header = section.querySelector(".game-header");
     const eventsDiv = section.querySelector(".events");
+    const arrow = section.querySelector(".arrow");
 
-    game.events.forEach((ev) => {
-      const el = document.createElement("div");
-      el.className = "event-card";
+    header.addEventListener("click", () => {
+      eventsDiv.classList.toggle("collapsed");
+      arrow.classList.toggle("open");
+    });
 
-      el.innerHTML = `
+    game.events.forEach(ev => {
+      const card = document.createElement("div");
+      card.className = "event-card";
+
+      card.innerHTML = `
         <h3>${ev.event_title}</h3>
         <p>${ev.type}</p>
         <p class="countdown">
@@ -96,33 +110,25 @@ section.innerHTML = `
           ${ev.remaining.seconds}s
         </p>
         <small>Submitted by ${ev.submitted_by}</small>
-      `; // ✅ closing backtick present
+      `;
 
-      eventsDiv.appendChild(el);
+      eventsDiv.appendChild(card);
     });
 
     container.appendChild(section);
   });
-} // ✅ closes renderEvents function
+}
 
-const header = section.querySelector("[data-toggle]");
-const eventsDiv = section.querySelector(".events");
-const arrow = section.querySelector(".arrow");
+/* ---------------- INIT ---------------- */
 
-header.addEventListener("click", () => {
-  eventsDiv.classList.toggle("collapsed");
-  arrow.classList.toggle("open");
-});
-
-// Fetch CSVs and initialize
 Promise.all([
-  fetch(GAMES_URL).then((r) => r.text()),
-  fetch(SUBMISSIONS_URL).then((r) => r.text()),
+  fetch(GAMES_URL).then(r => r.text()),
+  fetch(SUBMISSIONS_URL).then(r => r.text()),
 ]).then(([gamesCSV, subsCSV]) => {
   const games = parseCSV(gamesCSV);
   submissions = parseCSV(subsCSV);
 
-  games.forEach((g) => {
+  games.forEach(g => {
     gamesMap[g.game_key] = g;
   });
 
@@ -130,11 +136,11 @@ Promise.all([
   setInterval(renderEvents, 1000);
 });
 
-// Search input handling
-document.addEventListener("input", (e) => {
+/* ---------------- SEARCH ---------------- */
+
+document.addEventListener("input", e => {
   if (e.target.id === "searchInput") {
     searchQuery = e.target.value.toLowerCase();
     renderEvents();
   }
 });
-
