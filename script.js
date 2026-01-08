@@ -1,7 +1,7 @@
 const GAMES_URL =
-  "PASTE_YOUR_GAMES_SHEET_CSV_URL_HERE";
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vR76r__p7DDeh0CKE8pXB1Z1xDKXAkbtdauoyL4aYyeDrXQkbiOyojWIGl4WTxwcbdf4BaMtJ-FwPm9/pub?gid=623150298&single=true&output=csv";
 const SUBMISSIONS_URL =
-  "PASTE_YOUR_SUBMISSIONS_SHEET_CSV_URL_HERE";
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vR76r__p7DDeh0CKE8pXB1Z1xDKXAkbtdauoyL4aYyeDrXQkbiOyojWIGl4WTxwcbdf4BaMtJ-FwPm9/pub?gid=0&single=true&output=csv";
 
 let gamesMap = {};
 let submissions = [];
@@ -123,3 +123,4 @@ document.addEventListener("input", e => {
     renderEvents();
   }
 });
+
