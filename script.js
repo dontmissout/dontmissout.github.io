@@ -73,6 +73,8 @@ function renderEvents() {
 
     grouped[e.game_key].events.push({ ...e, remaining });
   });
+renderEvents();
+setInterval(updateCountdowns, 1000);
 
   Object.values(grouped).forEach(game => {
     const section = document.createElement("section");
@@ -103,7 +105,7 @@ function renderEvents() {
       card.innerHTML = `
         <h3>${ev.event_title}</h3>
         <p>${ev.type}</p>
-        <p class="countdown">
+        <p class="countdown" data-end="${ev.end_datetime_utc}">
           ${ev.remaining.days}d
           ${ev.remaining.hours}h
           ${ev.remaining.minutes}m
@@ -133,7 +135,6 @@ Promise.all([
   });
 
   renderEvents();
-  setInterval(renderEvents, 1000);
 });
 
 /* ---------------- SEARCH ---------------- */
@@ -144,3 +145,18 @@ document.addEventListener("input", e => {
     renderEvents();
   }
 });
+function updateCountdowns() {
+  document.querySelectorAll("[data-end]").forEach(el => {
+    const remaining = getTimeRemaining(el.dataset.end);
+    if (remaining.total <= 0) {
+      el.textContent = "Ended";
+      return;
+    }
+
+    el.textContent =
+      `${remaining.days}d ` +
+      `${remaining.hours}h ` +
+      `${remaining.minutes}m ` +
+      `${remaining.seconds}s`;
+  });
+}
