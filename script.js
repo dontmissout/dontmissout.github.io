@@ -64,66 +64,25 @@ function renderEvents() {
     grouped[e.game_key].events.push({ ...e, remaining });
   });
 
-Object.values(grouped).forEach(game => {
-  const section = document.createElement("section");
-  section.className = "game-section";
+  Object.values(grouped).forEach(game => {
+    const section = document.createElement("section");
+    section.className = "game-section";
 
-  section.innerHTML = `
-    <div class="game-header">
-      <img src="${game.cover}" alt="${game.display_name}">
-      <h2>${game.display_name}</h2>
-    </div>
-    <div class="events"></div>
-  `;
-
-  const eventsDiv = section.querySelector(".events");
-
-  game.events.forEach(ev => {
-    const el = document.createElement("div");
-    el.className = "event-card";
-
-    el.innerHTML = `
-      <h3>${ev.event_title}</h3>
-      <p>${ev.type}</p>
-      <p class="countdown">
-        ${ev.remaining.days}d
-        ${ev.remaining.hours}h
-        ${ev.remaining.minutes}m
-        ${ev.remaining.seconds}s
-      </p>
-      <small>Submitted by ${ev.submitted_by}</small>
+    section.innerHTML = `
+      <div class="game-header">
+        <img src="${game.cover}" alt="${game.display_name}">
+        <h2>${game.display_name}</h2>
+      </div>
+      <div class="events"></div>
     `;
 
-    eventsDiv.appendChild(el);
-  });
+    const eventsDiv = section.querySelector(".events");
 
-  container.appendChild(section);
-});
+    game.events.forEach(ev => {
+      const el = document.createElement("div");
+      el.className = "event-card";
 
-
-Promise.all([
-  fetch(GAMES_URL).then(r => r.text()),
-  fetch(SUBMISSIONS_URL).then(r => r.text())
-]).then(([gamesCSV, subsCSV]) => {
-  const games = parseCSV(gamesCSV);
-  submissions = parseCSV(subsCSV);
-
-  games.forEach(g => {
-    gamesMap[g.game_key] = g;
-  });
-
-  renderEvents();
-
-  setInterval(renderEvents, 1000);
-});
-
-document.addEventListener("input", e => {
-  if (e.target.id === "searchInput") {
-    searchQuery = e.target.value.toLowerCase();
-    renderEvents();
-  }
-});
-
-
-
-
+      el.innerHTML = `
+        <h3>${ev.event_title}</h3>
+        <p>${ev.type}</p>
+        <p class="
