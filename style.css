@@ -205,4 +205,23 @@ p {
 #searchInput:focus {
   background: rgba(255, 255, 255, 0.12);
 }
+.events.collapsed {
+  display: none;
+}
+
+.game-header {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.arrow {
+  margin-left: auto;
+  transition: transform 0.2s ease;
+}
+
+.arrow.open {
+  transform: rotate(90deg);
+}
 
