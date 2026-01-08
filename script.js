@@ -75,6 +75,7 @@ function renderEvents() {
   });
 renderEvents();
 setInterval(updateCountdowns, 1000);
+setInterval(renderEvents, 1000);
 
   Object.values(grouped).forEach(game => {
     const section = document.createElement("section");
@@ -160,3 +161,4 @@ function updateCountdowns() {
       `${remaining.seconds}s`;
   });
 }
+
