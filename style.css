@@ -1,182 +1,21 @@
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(180deg, #020617, #020617);
+  color: white;
+  text-align: center;
+  padding: 40px;
+}
+
 main {
   max-width: 800px;
   margin: 40px auto;
   padding: 0 20px;
 }
-body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(180deg, #020617, #020617);
-    color: white;
-    text-align: center;
-    padding: 40px;
-}
 
 h1 {
-    font-size: 2.5rem;
-    margin-bottom: 5px;
+  font-size: 2.5rem;
 }
 
-p {
-    color: #cbd5f5;
-}
-
-.game-section {
-    margin-top: 40px;
-    text-align: left;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.game-section h2 {
-    border-bottom: 2px solid #334155;
-    padding-bottom: 8px;
-}
-
-.event-card {
-    background: #1e293b;
-    margin-top: 15px;
-    padding: 15px;
-    border-radius: 10px;
-}
-.game-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-    user-select: none;
-}
-
-.game-header img {
-    width: 36px;
-    height: 36px;
-    object-fit: contain;
-}
-
-.toggle-arrow {
-    font-size: 1.2rem;
-    margin-left: auto;
-    transition: transform 0.2s ease;
-}
-
-.game-section.collapsed .toggle-arrow {
-    transform: rotate(-90deg);
-}
-
-.game-events {
-    margin-top: 10px;
-}
-
-.game-section.collapsed .game-events {
-    display: none;
-}
-.game-section {
-  margin-bottom: 32px;
-}
-
-.game-header {
-  padding: 12px 16px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
-
-  transition: background 0.2s ease;
-}
-
-.game-header:hover {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.game-header h2 {
-  font-size: 1.25rem;
-}
-
-.game-header img {
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
-  border-radius: 6px;
-}
-
-.arrow {
-  margin-left: auto;
-  transition: transform 0.25s ease;
-  opacity: 0.8;
-}
-
-.arrow.open {
-  transform: rotate(90deg);
-}
-
-
-.events {
-  overflow: hidden;
-  max-height: 0;
-  opacity: 0;
-  transition:
-    max-height 0.35s ease,
-    opacity 0.25s ease;
-}
-
-.events:not(.hidden) {
-  max-height: 1000px;
-  opacity: 1;
-}
-
-.event {
-  padding: 10px 20px;
-  border-left: 2px solid #444;
-  margin-left: 20px;
-}
-
-.countdown {
-  margin-top: 6px;
-  font-weight: 600;
-  color: #4fd1c5;
-}
-
-.event.ending-soon {
-  border-left-color: #f87171;
-}
-
-.event.ending-soon .countdown {
-  color: #f87171;
-}
-.event {
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 12px;
-  padding: 16px 20px;
-  margin: 12px 0 12px 20px;
-  border-left: 3px solid #4fd1c5;
-
-  transition: 
-    transform 0.2s ease,
-    background 0.2s ease;
-}
-
-.event:hover {
-  transform: translateX(4px);
-  background: rgba(255, 255, 255, 0.07);
-}
-.event-meta {
-  margin-top: 10px;
-  display: flex;
-  gap: 16px;
-  font-size: 0.85rem;
-  opacity: 0.8;
-}
-
-.event-meta a {
-  color: #60a5fa;
-  text-decoration: none;
-}
-
-.event-meta a:hover {
-  text-decoration: underline;
-}
-
-.submitted-by {
-  color: #a1a1aa;
-}
 .search-container {
   display: flex;
   justify-content: center;
@@ -190,38 +29,59 @@ p {
   border-radius: 10px;
   border: none;
   outline: none;
-
   background: rgba(255, 255, 255, 0.08);
   color: white;
-  font-size: 1rem;
-
-  transition: background 0.2s ease;
 }
 
-#searchInput::placeholder {
-  color: #a1a1aa;
-}
-
-#searchInput:focus {
-  background: rgba(255, 255, 255, 0.12);
-}
-.events.collapsed {
-  display: none;
+.game-section {
+  margin-bottom: 32px;
+  text-align: left;
 }
 
 .game-header {
-  cursor: pointer;
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+}
+
+.game-header img {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
 }
 
 .arrow {
   margin-left: auto;
-  transition: transform 0.2s ease;
+  transition: transform 0.25s ease;
 }
 
 .arrow.open {
   transform: rotate(90deg);
 }
 
+.events {
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.events.collapsed {
+  display: none;
+}
+
+.event-card {
+  background: #1e293b;
+  margin: 12px 0 12px 20px;
+  padding: 16px;
+  border-radius: 12px;
+  border-left: 3px solid #4fd1c5;
+}
+
+.countdown {
+  margin-top: 6px;
+  font-weight: bold;
+  color: #4fd1c5;
+}
