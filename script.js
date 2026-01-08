@@ -18,6 +18,12 @@ Promise.all([
 .catch(err => {
   console.error("FETCH ERROR:", err);
 });
+document.addEventListener("input", e => {
+  if (e.target.id === "searchInput") {
+    searchQuery = e.target.value.toLowerCase();
+    renderEvents();
+  }
+});
 
 function parseCSV(csv) {
   const lines = csv.trim().split("\n");
@@ -124,5 +130,6 @@ function getTimeRemaining(endDate) {
     minutes: Math.floor((diff / 60000) % 60)
   };
 }
+
 
 
