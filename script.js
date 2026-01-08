@@ -99,7 +99,6 @@ function renderEvents() {
   }
     container.appendChild(section);
   });
-}
 
 Promise.all([
   fetch(GAMES_URL).then(r => r.text()),
@@ -123,5 +122,6 @@ document.addEventListener("input", e => {
     renderEvents();
   }
 });
+
 
 
