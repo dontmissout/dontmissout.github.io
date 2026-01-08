@@ -93,10 +93,9 @@ function renderEvents() {
         </p>
         <small>Submitted by ${ev.submitted_by}</small>
       `;
-
       eventsDiv.appendChild(el);
     });
-  }
+
     container.appendChild(section);
   });
 
