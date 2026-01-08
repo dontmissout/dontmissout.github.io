@@ -1,6 +1,7 @@
 const SUBMISSIONS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR76r__p7DDeh0CKE8pXB1Z1xDKXAkbtdauoyL4aYyeDrXQkbiOyojWIGl4WTxwcbdf4BaMtJ-FwPm9/pub?gid=0&single=true&output=csv";
 const GAMES_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR76r__p7DDeh0CKE8pXB1Z1xDKXAkbtdauoyL4aYyeDrXQkbiOyojWIGl4WTxwcbdf4BaMtJ-FwPm9/pub?gid=623150298&single=true&output=csv";
 
+let searchQuery = "";
 let gamesMap = {};
 let submissions = [];
 
@@ -123,4 +124,5 @@ function getTimeRemaining(endDate) {
     minutes: Math.floor((diff / 60000) % 60)
   };
 }
+
 
