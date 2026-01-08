@@ -121,6 +121,23 @@ setInterval(renderEvents, 1000);
     container.appendChild(section);
   });
 }
+function updateCountdowns() {
+  document.querySelectorAll(".event-card").forEach(card => {
+    const end = card.dataset.end;
+    if (!end) return;
+
+    const remaining = getTimeRemaining(end);
+    if (remaining.total <= 0) {
+      card.remove();
+      return;
+    }
+const el = document.createElement("div");
+el.className = "event-card";
+el.dataset.end = ev.end_datetime_utc;
+
+    card.querySelector(".countdown").textContent =
+      `${remaining.days}d ${remaining.hours}h ${remaining.minutes}m ${remaining.seconds}s`;
+  });
 
 /* ---------------- INIT ---------------- */
 
@@ -161,4 +178,5 @@ function updateCountdowns() {
       `${remaining.seconds}s`;
   });
 }
+
 
