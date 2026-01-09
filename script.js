@@ -216,3 +216,4 @@ document.getElementById("sortSelect").addEventListener("change", (e) => {
     sortBy = e.target.value;
     renderEvents();
 });
+
