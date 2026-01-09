@@ -7,7 +7,7 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: #020617; /* Dark Slate Background */
+    background: #020617;
     color: #f1f5f9;
     padding: 20px;
     line-height: 1.6;
@@ -37,16 +37,19 @@ p {
     color: #94a3b8;
 }
 
-/* --- Search --- */
+/* --- Search & Sort Container --- */
 .search-container {
     display: flex;
     justify-content: center;
+    gap: 10px; /* Space between input and select */
     margin-bottom: 40px;
+    max-width: 600px; /* Wider to fit both */
+    margin-left: auto;
+    margin-right: auto;
 }
 
 #searchInput {
-    width: 100%;
-    max-width: 400px;
+    flex-grow: 1; /* Takes up available space */
     padding: 14px 20px;
     border-radius: 12px;
     border: 1px solid #334155;
@@ -56,7 +59,19 @@ p {
     transition: all 0.2s ease;
 }
 
-#searchInput:focus {
+/* New Dropdown Styling */
+#sortSelect {
+    padding: 14px 20px;
+    border-radius: 12px;
+    border: 1px solid #334155;
+    background: #1e293b;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#searchInput:focus, #sortSelect:focus {
     outline: none;
     border-color: #60a5fa;
     box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
@@ -71,7 +86,6 @@ p {
     border: 1px solid #1e293b;
 }
 
-/* Header (Clickable) */
 .game-header {
     display: flex;
     align-items: center;
@@ -105,12 +119,11 @@ p {
     color: #94a3b8;
 }
 
-/* Toggled State */
 .game-section.open .arrow {
     transform: rotate(90deg);
 }
 
-/* --- Events List (Accordion) --- */
+/* --- Events List --- */
 .events-container {
     max-height: 0;
     overflow: hidden;
@@ -119,7 +132,7 @@ p {
 }
 
 .game-section.open .events-container {
-    max-height: 2000px; /* Arbitrary large height for transition */
+    max-height: 2000px;
 }
 
 /* --- Event Card --- */
@@ -129,11 +142,6 @@ p {
     display: flex;
     flex-direction: column;
     gap: 5px;
-}
-
-.event-card h3 {
-    font-size: 1.1rem;
-    color: #e2e8f0;
 }
 
 .event-type {
@@ -152,12 +160,12 @@ p {
     font-family: 'Courier New', monospace;
     font-size: 1.1rem;
     font-weight: 700;
-    color: #38bdf8; /* Light Blue */
+    color: #38bdf8;
     margin: 5px 0;
 }
 
 .event-card.expired .countdown {
-    color: #ef4444; /* Red for expired */
+    color: #ef4444;
 }
 
 .submitter {
