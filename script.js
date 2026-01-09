@@ -4,13 +4,11 @@ const SUBMISSIONS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR76r__
 let gamesMap = {};
 let submissions = [];
 let searchQuery = "";
-let sortBy = "soonest"; // Default sort order
+let sortBy = "soonest"; 
 
-// 1. Fetch and Parse
 function parseCSV(text) {
   const lines = text.trim().split("\n");
   const headers = lines.shift().split(",").map(h => h.trim());
-
   return lines.map((line) => {
     const values = line.split(","); 
     const obj = {};
@@ -21,23 +19,23 @@ function parseCSV(text) {
   });
 }
 
-// 2. Build the Structure
 function renderEvents() {
   const container = document.getElementById("games-container");
   container.innerHTML = "";
 
   const grouped = {};
 
+  // 1. Group Events
   submissions.forEach((e) => {
     if (e.approved !== "TRUE") return;
     if (!gamesMap[e.game_key]) return;
 
-    // Filter by search
     const searchText = `${gamesMap[e.game_key].display_name} ${e.event_title} ${e.type} ${e.submitted_by}`.toLowerCase();
     if (searchQuery && !searchText.includes(searchQuery)) return;
 
-    // Don't show expired events
     const endDate = new Date(e.end_datetime_utc);
+    // Safety check: if date is invalid, skip or treat as far future
+    if (isNaN(endDate.getTime())) return;
     if (new Date() > endDate) return; 
 
     if (!grouped[e.game_key]) {
@@ -49,34 +47,37 @@ function renderEvents() {
     grouped[e.game_key].events.push(e);
   });
 
-  // --- SORTING LOGIC START ---
+  // 2. Convert to Array for Sorting
   let sortedGroups = Object.values(grouped);
 
+  // 3. Sorting Logic
   if (sortBy === 'alpha') {
-      // Sort Games Alphabetically
-      sortedGroups.sort((a, b) => a.meta.display_name.localeCompare(b.meta.display_name));
-  } else {
-      // Sort Games by "Ending Soonest"
       sortedGroups.sort((a, b) => {
-          const getEarliest = (group) => Math.min(...group.events.map(e => new Date(e.end_datetime_utc)));
-          return getEarliest(a) - getEarliest(b);
+          return a.meta.display_name.localeCompare(b.meta.display_name);
+      });
+  } else {
+      // Sort by "Earliest Ending Event in the group"
+      sortedGroups.sort((a, b) => {
+          // Helper to get the earliest timestamp in a group
+          const getMinTime = (group) => {
+              const times = group.events.map(e => new Date(e.end_datetime_utc).getTime());
+              return Math.min(...times) || 9999999999999; // Fallback if empty
+          };
+          return getMinTime(a) - getMinTime(b);
       });
   }
-  // --- SORTING LOGIC END ---
 
-  // Render sorted groups
+  // 4. Render to DOM
   sortedGroups.forEach((group) => {
     const game = group.meta;
     
-    // Sort events INSIDE the card as well (Always soonest first inside the card)
+    // Sort events INSIDE the card (Always soonest at top)
     group.events.sort((a, b) => new Date(a.end_datetime_utc) - new Date(b.end_datetime_utc));
 
     const section = document.createElement("div");
     section.className = "game-section"; 
-    // If searching, automatically open sections to show results
     if(searchQuery) section.classList.add("open");
 
-    // Build header
     const header = document.createElement("div");
     header.className = "game-header";
     header.innerHTML = `
@@ -89,7 +90,6 @@ function renderEvents() {
         section.classList.toggle("open");
     });
 
-    // Build Events Container
     const eventsDiv = document.createElement("div");
     eventsDiv.className = "events-container";
 
@@ -100,9 +100,7 @@ function renderEvents() {
         card.innerHTML = `
             <h3>${ev.event_title}</h3>
             <span class="event-type">${ev.type}</span>
-            <div class="countdown" data-date="${ev.end_datetime_utc}">
-                Loading...
-            </div>
+            <div class="countdown" data-date="${ev.end_datetime_utc}">Loading...</div>
             <div class="submitter">Submitted by ${ev.submitted_by}</div>
         `;
         eventsDiv.appendChild(card);
@@ -116,7 +114,6 @@ function renderEvents() {
   updateTimers();
 }
 
-// 3. Update Timers
 function updateTimers() {
     const timerElements = document.querySelectorAll('.countdown');
     const now = new Date();
@@ -140,7 +137,6 @@ function updateTimers() {
     });
 }
 
-// 4. Initialize
 Promise.all([
   fetch(GAMES_URL).then((r) => r.text()),
   fetch(SUBMISSIONS_URL).then((r) => r.text()),
@@ -153,7 +149,7 @@ Promise.all([
   setInterval(updateTimers, 1000);
 });
 
-// 5. Event Listeners
+// Event Listeners
 document.getElementById("searchInput").addEventListener("input", (e) => {
     searchQuery = e.target.value.toLowerCase();
     renderEvents();
@@ -161,5 +157,6 @@ document.getElementById("searchInput").addEventListener("input", (e) => {
 
 document.getElementById("sortSelect").addEventListener("change", (e) => {
     sortBy = e.target.value;
+    console.log("Sorting by:", sortBy); // Debugging check
     renderEvents();
 });
