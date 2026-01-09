@@ -5,29 +5,70 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Game Event Tracker</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-  <header>
-    <h1>Don't Miss Out</h1>
-    <p>Track your favorite game events and drops</p>
+
+  <div class="bg-mesh"></div>
+
+  <header class="main-header">
+    <div class="logo-area">
+      <div class="logo-placeholder">
+        <i class="fa-solid fa-gamepad"></i> </div>
+      <div class="title-group">
+        <h1>EventTracker</h1>
+        <p>Don't miss the drop</p>
+      </div>
+    </div>
+
+    <div class="version-control">
+      <div class="help-icon">?</div>
+      <div class="tooltip-content">
+        <h3>Changelog</h3>
+        <ul>
+            <li><strong>v1.2:</strong> Added sorting & mobile support</li>
+            <li><strong>v1.1:</strong> Added "Ending Soon" section</li>
+            <li><strong>v1.0:</strong> Initial Release</li>
+        </ul>
+        <div class="version-number">Ver: 1.2.0</div>
+      </div>
+    </div>
   </header>
 
-<div class="search-container">
-    <input
-      type="text"
-      id="searchInput"
-      placeholder="Search games, events..."
-    />
-    <select id="sortSelect">
-        <option value="soonest">Ending Soonest</option>
-        <option value="alpha">Name (A-Z)</option>
-    </select>
+  <div class="controls-container">
+    <div class="search-wrapper">
+      <i class="fa-solid fa-magnifying-glass search-icon"></i>
+      <input type="text" id="searchInput" placeholder="Search games, events...">
+    </div>
+    
+    <div class="sort-wrapper">
+      <select id="sortSelect">
+        <option value="soonest">Sort: Ending Soonest</option>
+        <option value="alpha">Sort: Name (A-Z)</option>
+      </select>
+    </div>
   </div>
 
-  <main id="games-container">
-    </main>
+  <main>
+    <section class="category-section collapsed" id="section-urgent">
+      <div class="category-header">
+        <h2><i class="fa-solid fa-fire"></i> Ending Soon (48h)</h2>
+        <span class="category-arrow">▼</span>
+      </div>
+      <div class="category-content" id="container-urgent">
+        </div>
+    </section>
+
+    <section class="category-section collapsed" id="section-all">
+      <div class="category-header">
+        <h2><i class="fa-solid fa-layer-group"></i> All Games</h2>
+        <span class="category-arrow">▼</span>
+      </div>
+      <div class="category-content" id="container-all">
+        </div>
+    </section>
+  </main>
 
   <script src="script.js"></script>
 </body>
 </html>
-
