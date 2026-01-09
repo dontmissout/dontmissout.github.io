@@ -6,119 +6,145 @@ let submissions = [];
 let searchQuery = "";
 let sortBy = "soonest"; 
 
+// 1. Data Parsing
 function parseCSV(text) {
   const lines = text.trim().split("\n");
   const headers = lines.shift().split(",").map(h => h.trim());
   return lines.map((line) => {
     const values = line.split(","); 
     const obj = {};
-    headers.forEach((h, i) => {
-      obj[h] = values[i] ? values[i].trim() : "";
-    });
+    headers.forEach((h, i) => { obj[h] = values[i] ? values[i].trim() : ""; });
     return obj;
   });
 }
 
+// 2. Main Logic
 function renderEvents() {
-  const container = document.getElementById("games-container");
-  container.innerHTML = "";
+  // Clear both containers
+  const urgentContainer = document.getElementById("container-urgent");
+  const allContainer = document.getElementById("container-all");
+  urgentContainer.innerHTML = "";
+  allContainer.innerHTML = "";
 
-  const grouped = {};
+  // Grouping objects
+  const groupsAll = {};
+  const groupsUrgent = {};
+  const now = new Date();
+  const urgentThreshold = 48 * 60 * 60 * 1000; // 48 Hours in milliseconds
 
-  // 1. Group Events
   submissions.forEach((e) => {
     if (e.approved !== "TRUE") return;
     if (!gamesMap[e.game_key]) return;
 
-    const searchText = `${gamesMap[e.game_key].display_name} ${e.event_title} ${e.type} ${e.submitted_by}`.toLowerCase();
+    // Search Filter
+    const searchText = `${gamesMap[e.game_key].display_name} ${e.event_title} ${e.type}`.toLowerCase();
     if (searchQuery && !searchText.includes(searchQuery)) return;
 
     const endDate = new Date(e.end_datetime_utc);
-    // Safety check: if date is invalid, skip or treat as far future
-    if (isNaN(endDate.getTime())) return;
-    if (new Date() > endDate) return; 
+    if (isNaN(endDate.getTime())) return; // Invalid date
+    if (now > endDate) return; // Expired
 
-    if (!grouped[e.game_key]) {
-      grouped[e.game_key] = {
-        meta: gamesMap[e.game_key],
-        events: []
-      };
+    const timeDiff = endDate - now;
+
+    // Add to "All" Group
+    addToGroup(groupsAll, e);
+
+    // Add to "Urgent" Group if < 48 hours
+    if (timeDiff <= urgentThreshold) {
+        addToGroup(groupsUrgent, e);
     }
-    grouped[e.game_key].events.push(e);
   });
 
-  // 2. Convert to Array for Sorting
-  let sortedGroups = Object.values(grouped);
-
-  // 3. Sorting Logic
-  if (sortBy === 'alpha') {
-      sortedGroups.sort((a, b) => {
-          return a.meta.display_name.localeCompare(b.meta.display_name);
-      });
+  // Render the lists
+  renderList(groupsAll, allContainer);
+  
+  // If no urgent events, show a placeholder or just leave empty
+  if (Object.keys(groupsUrgent).length === 0) {
+      urgentContainer.innerHTML = "<div style='padding:20px; color:#94a3b8; text-align:center;'>No events ending soon.</div>";
   } else {
-      // Sort by "Earliest Ending Event in the group"
-      sortedGroups.sort((a, b) => {
-          // Helper to get the earliest timestamp in a group
-          const getMinTime = (group) => {
-              const times = group.events.map(e => new Date(e.end_datetime_utc).getTime());
-              return Math.min(...times) || 9999999999999; // Fallback if empty
-          };
-          return getMinTime(a) - getMinTime(b);
-      });
+      renderList(groupsUrgent, urgentContainer);
+  }
+  
+  // If searching, auto-expand the categories
+  if (searchQuery) {
+      document.querySelectorAll('.category-section').forEach(el => el.classList.remove('collapsed'));
   }
 
-  // 4. Render to DOM
-  sortedGroups.forEach((group) => {
-    const game = group.meta;
-    
-    // Sort events INSIDE the card (Always soonest at top)
-    group.events.sort((a, b) => new Date(a.end_datetime_utc) - new Date(b.end_datetime_utc));
-
-    const section = document.createElement("div");
-    section.className = "game-section"; 
-    if(searchQuery) section.classList.add("open");
-
-    const header = document.createElement("div");
-    header.className = "game-header";
-    header.innerHTML = `
-        <img src="${game.cover_image}" alt="${game.display_name}">
-        <h2>${game.display_name}</h2>
-        <span class="arrow">▶</span>
-    `;
-
-    header.addEventListener("click", () => {
-        section.classList.toggle("open");
-    });
-
-    const eventsDiv = document.createElement("div");
-    eventsDiv.className = "events-container";
-
-    group.events.forEach((ev) => {
-        const card = document.createElement("div");
-        card.className = "event-card";
-        
-        card.innerHTML = `
-            <h3>${ev.event_title}</h3>
-            <span class="event-type">${ev.type}</span>
-            <div class="countdown" data-date="${ev.end_datetime_utc}">Loading...</div>
-            <div class="submitter">Submitted by ${ev.submitted_by}</div>
-        `;
-        eventsDiv.appendChild(card);
-    });
-
-    section.appendChild(header);
-    section.appendChild(eventsDiv);
-    container.appendChild(section);
-  });
-  
   updateTimers();
 }
 
-function updateTimers() {
-    const timerElements = document.querySelectorAll('.countdown');
-    const now = new Date();
+// Helper to push to groups
+function addToGroup(groupObj, event) {
+    if (!groupObj[event.game_key]) {
+        groupObj[event.game_key] = {
+            meta: gamesMap[event.game_key],
+            events: []
+        };
+    }
+    groupObj[event.game_key].events.push(event);
+}
 
-    timerElements.forEach(el => {
+// Helper to Render a specific dictionary of groups into a DOM container
+function renderList(groupedData, domContainer) {
+    let sortedGroups = Object.values(groupedData);
+
+    // Sort Logic
+    if (sortBy === 'alpha') {
+        sortedGroups.sort((a, b) => a.meta.display_name.localeCompare(b.meta.display_name));
+    } else {
+        sortedGroups.sort((a, b) => {
+            const getMin = (g) => Math.min(...g.events.map(e => new Date(e.end_datetime_utc).getTime())) || 9999999999999;
+            return getMin(a) - getMin(b);
+        });
+    }
+
+    sortedGroups.forEach((group) => {
+        const game = group.meta;
+        // Sort events inside card
+        group.events.sort((a, b) => new Date(a.end_datetime_utc) - new Date(b.end_datetime_utc));
+
+        const section = document.createElement("div");
+        section.className = "game-section";
+        if(searchQuery) section.classList.add("open"); // Auto open on search
+
+        // Header
+        const header = document.createElement("div");
+        header.className = "game-header";
+        header.innerHTML = `
+            <img src="${game.cover_image}" alt="${game.display_name}">
+            <h3>${game.display_name}</h3>
+            <span class="game-arrow">▶</span>
+        `;
+        header.addEventListener("click", () => section.classList.toggle("open"));
+
+        // Events
+        const eventsDiv = document.createElement("div");
+        eventsDiv.className = "events-container";
+
+        group.events.forEach((ev) => {
+            const card = document.createElement("div");
+            card.className = "event-card";
+            card.innerHTML = `
+                <div class="event-top">
+                    <span class="event-title">${ev.event_title}</span>
+                    <span class="event-tag">${ev.type}</span>
+                </div>
+                <div class="countdown" data-date="${ev.end_datetime_utc}">Loading...</div>
+                <div class="submitter">By ${ev.submitted_by}</div>
+            `;
+            eventsDiv.appendChild(card);
+        });
+
+        section.appendChild(header);
+        section.appendChild(eventsDiv);
+        domContainer.appendChild(section);
+    });
+}
+
+// 3. Timer Logic
+function updateTimers() {
+    const now = new Date();
+    document.querySelectorAll('.countdown').forEach(el => {
         const endDate = new Date(el.dataset.date);
         const total = endDate - now;
 
@@ -128,28 +154,35 @@ function updateTimers() {
             return;
         }
 
-        const seconds = Math.floor((total / 1000) % 60);
-        const minutes = Math.floor((total / 1000 / 60) % 60);
-        const hours = Math.floor((total / (1000 * 60 * 60)) % 24);
-        const days = Math.floor(total / (1000 * 60 * 60 * 24));
+        const d = Math.floor(total / (1000 * 60 * 60 * 24));
+        const h = Math.floor((total / (1000 * 60 * 60)) % 24);
+        const m = Math.floor((total / 1000 / 60) % 60);
+        const s = Math.floor((total / 1000) % 60);
 
-        el.innerText = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        el.innerText = `${d}d ${h}h ${m}m ${s}s`;
     });
 }
 
+// 4. Initializers & Listeners
+// Handle Main Category Toggles
+document.querySelectorAll('.category-header').forEach(header => {
+    header.addEventListener('click', function() {
+        this.parentElement.classList.toggle('collapsed');
+    });
+});
+
 Promise.all([
-  fetch(GAMES_URL).then((r) => r.text()),
-  fetch(SUBMISSIONS_URL).then((r) => r.text()),
+  fetch(GAMES_URL).then(r => r.text()),
+  fetch(SUBMISSIONS_URL).then(r => r.text()),
 ]).then(([gamesCSV, subsCSV]) => {
   const gamesList = parseCSV(gamesCSV);
-  gamesList.forEach((g) => { gamesMap[g.game_key] = g; });
+  gamesList.forEach(g => { gamesMap[g.game_key] = g; });
   submissions = parseCSV(subsCSV);
 
   renderEvents();
   setInterval(updateTimers, 1000);
 });
 
-// Event Listeners
 document.getElementById("searchInput").addEventListener("input", (e) => {
     searchQuery = e.target.value.toLowerCase();
     renderEvents();
@@ -157,6 +190,5 @@ document.getElementById("searchInput").addEventListener("input", (e) => {
 
 document.getElementById("sortSelect").addEventListener("change", (e) => {
     sortBy = e.target.value;
-    console.log("Sorting by:", sortBy); // Debugging check
     renderEvents();
 });
