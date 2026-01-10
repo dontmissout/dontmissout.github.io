@@ -7,8 +7,28 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
 
+<body>
+<section class="notification-banner">
+    <div class="notify-content">
+        <i class="fa-solid fa-bell-ring"></i>
+        <span>Never miss a drop. Get notified when new events are added!</span>
+        <button id="openNotify" class="notify-btn-small">Notify Me</button>
+    </div>
+</section>
+
+<div id="notifyModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Stay in the Loop</h2>
+        <p>We'll send you a quick alert whenever a new event is added for your favorite games.</p>
+        <form id="subscribeForm">
+            <input type="email" placeholder="Enter your email" required>
+            <button type="submit" class="subscribe-submit">Subscribe</button>
+        </form>
+        <p class="disclaimer">No spam. Only game drops. Unsubscribe anytime.</p>
+    </div>
+</div>
   <div class="bg-mesh"></div>
 
   <header class="main-header">
@@ -91,4 +111,5 @@
   <script src="script.js"></script>
 </body>
 </html>
+
 
