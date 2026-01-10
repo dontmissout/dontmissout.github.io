@@ -341,3 +341,91 @@ body {
     55% { transform: translateY(30px); opacity: 0; }
     100% { transform: translateY(0); opacity: 1; }
 }
+
+/* --- Notification Banner --- */
+.notification-banner {
+    max-width: 900px;
+    margin: 0 auto 20px auto;
+    background: linear-gradient(90deg, var(--accent-glow), transparent);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 20px;
+}
+
+.notify-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    font-size: 0.9rem;
+}
+
+.notify-btn-small {
+    background: var(--accent);
+    color: var(--bg-dark);
+    border: none;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+/* --- "NEW" Badge --- */
+.badge-new {
+    background: #10b981; /* Emeral green */
+    color: white;
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 800;
+    margin-left: 8px;
+    vertical-align: middle;
+    text-transform: uppercase;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+
+/* --- Modal Styles --- */
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(5px);
+    display: none; /* Hidden by default */
+    align-items: center; justify-content: center;
+}
+
+.modal-content {
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    padding: 40px;
+    border-radius: 20px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    position: relative;
+}
+
+.close-modal {
+    position: absolute; top: 15px; right: 20px;
+    font-size: 1.5rem; cursor: pointer; color: var(--text-muted);
+}
+
+#subscribeForm {
+    margin: 20px 0;
+    display: flex; flex-direction: column; gap: 10px;
+}
+
+#subscribeForm input {
+    padding: 12px; border-radius: 8px; border: 1px solid var(--border);
+    background: rgba(255,255,255,0.05); color: white;
+}
+
+.subscribe-submit {
+    background: var(--accent); color: var(--bg-dark);
+    border: none; padding: 12px; border-radius: 8px;
+    font-weight: bold; cursor: pointer;
+}
+
+.disclaimer { font-size: 0.7rem; color: var(--text-muted); }
