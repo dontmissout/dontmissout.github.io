@@ -10,20 +10,16 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script type="text/javascript">
        (function(){
-          // Your Public Key
           emailjs.init("8cYhM41Kd5nP1f_2V");
        })();
     </script>
 </head>
 <body data-theme="dark">
-
   <div class="bg-mesh"></div>
 
   <header class="main-header">
     <div class="logo-area">
-      <div class="logo-placeholder">
-        <i class="fa-solid fa-gamepad"></i>
-      </div>
+      <div class="logo-placeholder"><i class="fa-solid fa-gamepad"></i></div>
       <div class="title-group">
         <h1>EventTracker</h1>
         <p>Don't miss the drop</p>
@@ -31,20 +27,16 @@
     </div>
 
     <div class="header-actions">
-      <button id="themeToggle" class="theme-btn" title="Switch Theme">
-        <div class="theme-icon-container">
-          <i id="themeIcon" class="fa-solid fa-moon"></i>
-        </div>
+      <button id="themeToggle" class="theme-btn">
+        <div class="theme-icon-container"><i id="themeIcon" class="fa-solid fa-moon"></i></div>
       </button>
-
       <div class="version-control">
         <div class="help-icon">?</div>
         <div class="tooltip-content">
           <h3>Changelog</h3>
           <ul>
               <li><strong>v1.5:</strong> Fixed layout duplication</li>
-              <li><strong>v1.4:</strong> Email Subscription & Filters</li>
-              <li><strong>v1.3:</strong> Dynamic Themes</li>
+              <li><strong>v1.4:</strong> Email Subscription</li>
           </ul>
           <div class="version-number">Ver: 1.5.0</div>
         </div>
@@ -67,7 +59,6 @@
       <i class="fa-solid fa-magnifying-glass search-icon"></i>
       <input type="text" id="searchInput" placeholder="Search games, events...">
     </div>
-    
     <div class="sort-wrapper">
       <select id="sortSelect">
         <option value="soonest">Sort: Ending Soonest</option>
@@ -95,12 +86,10 @@
 
     <section class="category-section collapsed" id="section-library">
       <div class="category-header">
-        <h2><i class="fa-solid fa-layer-group" style="color: var(--text-muted);"></i> All Games / No Events</h2>
+        <h2><i class="fa-solid fa-layer-group"></i> All Games / No Events</h2>
         <span class="category-arrow">▼</span>
       </div>
-      <div class="category-content">
-        <div id="container-library" class="library-grid"></div>
-      </div>
+      <div class="category-content" id="container-library"></div>
     </section>
   </main>
 
@@ -108,22 +97,15 @@
     <div class="modal-content">
         <span class="close-modal">&times;</span>
         <h2>Stay in the Loop</h2>
-        <p>Select the games you want to track.</p>
-        
         <form id="subscribeForm">
             <input type="email" id="userEmail" placeholder="Enter your email address" required>
-            
             <div class="subscription-controls">
                 <span class="sub-hint">Uncheck games to ignore</span>
                 <button type="button" id="toggleAllGames" class="text-btn">Deselect All</button>
             </div>
-
-            <div id="game-subscription-list" class="game-checkbox-list">
-                </div>
-
+            <div id="game-subscription-list" class="game-checkbox-list"></div>
             <button type="submit" class="subscribe-submit">Subscribe</button>
         </form>
-        <p class="disclaimer">No spam. Only drops for games you choose.</p>
     </div>
   </div>
 
