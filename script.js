@@ -1,305 +1,165 @@
-// --- Configuration ---
 const GAMES_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR76r__p7DDeh0CKE8pXB1Z1xDKXAkbtdauoyL4aYyeDrXQkbiOyojWIGl4WTxwcbdf4BaMtJ-FwPm9/pub?gid=623150298&single=true&output=csv";
 const SUBMISSIONS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR76r__p7DDeh0CKE8pXB1Z1xDKXAkbtdauoyL4aYyeDrXQkbiOyojWIGl4WTxwcbdf4BaMtJ-FwPm9/pub?gid=0&single=true&output=csv";
 
-// User's EmailJS Config
 const SERVICE_ID = "service_yfaukwg";
 const TEMPLATE_ID = "template_rmz7ocl";
 
-// State
 let gamesMap = {};
 let submissions = [];
 let searchQuery = "";
-let sortBy = "soonest"; 
+let sortBy = "soonest";
 
-// --- 1. Data Parsing ---
+// CSV Parser
 function parseCSV(text) {
-  const lines = text.trim().split("\n");
-  const headers = lines.shift().split(",").map(h => h.trim());
-  return lines.map((line) => {
-    const values = line.split(","); 
-    const obj = {};
-    headers.forEach((h, i) => { obj[h] = values[i] ? values[i].trim() : ""; });
-    return obj;
-  });
+    const lines = text.trim().split("\n");
+    const headers = lines.shift().split(",").map(h => h.trim());
+    return lines.map(line => {
+        const values = line.split(",");
+        const obj = {};
+        headers.forEach((h, i) => { obj[h] = values[i] ? values[i].trim() : ""; });
+        return obj;
+    });
 }
 
-// --- 2. Main Render Logic ---
+// Render Core
 function renderEvents() {
-  const urgentContainer = document.getElementById("container-urgent");
-  const activeContainer = document.getElementById("container-active");
-  const libraryContainer = document.getElementById("container-library");
-  
-  urgentContainer.innerHTML = "";
-  activeContainer.innerHTML = "";
-  libraryContainer.innerHTML = "";
+    const urgentCont = document.getElementById("container-urgent");
+    const activeCont = document.getElementById("container-active");
+    const libraryCont = document.getElementById("container-library");
 
-  const groupsActive = {};
-  const groupsUrgent = {};
-  const gamesWithEvents = new Set();
-  
-  const now = new Date();
-  const urgentThreshold = 48 * 60 * 60 * 1000; // 48 Hours
+    urgentCont.innerHTML = "";
+    activeCont.innerHTML = "";
+    libraryCont.innerHTML = "";
 
-  submissions.forEach((e) => {
-    if (e.approved !== "TRUE") return;
-    if (!gamesMap[e.game_key]) return;
+    const groupsActive = {};
+    const groupsUrgent = {};
+    const gamesWithEvents = new Set();
+    const now = new Date();
+    const urgentTime = 48 * 60 * 60 * 1000;
 
-    // Search Filtering
-    const searchText = `${gamesMap[e.game_key].display_name} ${e.event_title} ${e.type}`.toLowerCase();
-    if (searchQuery && !searchText.includes(searchQuery)) return;
+    submissions.forEach(e => {
+        if (e.approved !== "TRUE" || !gamesMap[e.game_key]) return;
+        
+        const end = new Date(e.end_datetime_utc);
+        if (isNaN(end.getTime()) || now > end) return;
 
-    const endDate = new Date(e.end_datetime_utc);
-    if (isNaN(endDate.getTime())) return;
-    if (now > endDate) return; // Expired
+        const text = `${gamesMap[e.game_key].display_name} ${e.event_title}`.toLowerCase();
+        if (searchQuery && !text.includes(searchQuery)) return;
 
-    gamesWithEvents.add(e.game_key);
-    const timeDiff = endDate - now;
+        gamesWithEvents.add(e.game_key);
+        const targetGroup = (end - now <= urgentTime) ? groupsUrgent : groupsActive;
+        
+        if (!targetGroup[e.game_key]) targetGroup[e.game_key] = { meta: gamesMap[e.game_key], events: [] };
+        targetGroup[e.game_key].events.push(e);
+    });
 
-    if (timeDiff <= urgentThreshold) {
-        addToGroup(groupsUrgent, e);
-    } else {
-        addToGroup(groupsActive, e);
-    }
-  });
-
-  // Library Logic (Games with no active events)
-  const libraryGames = [];
-  Object.values(gamesMap).forEach(game => {
-      if (searchQuery && !game.display_name.toLowerCase().includes(searchQuery)) return;
-      if (!gamesWithEvents.has(game.game_key)) {
-          libraryGames.push(game);
-      }
-  });
-
-  // Execute Renders
-  renderAccordionList(groupsUrgent, urgentContainer);
-  renderAccordionList(groupsActive, activeContainer);
-  renderLibraryList(libraryGames, libraryContainer);
-  
-  // Empty States
-  if (Object.keys(groupsUrgent).length === 0) urgentContainer.innerHTML = "<div style='padding:20px; color:var(--text-muted); text-align:center;'>No urgent events.</div>";
-  if (Object.keys(groupsActive).length === 0) activeContainer.innerHTML = "<div style='padding:20px; color:var(--text-muted); text-align:center;'>No active events.</div>";
-  
-  updateTimers();
+    buildAccordion(groupsUrgent, urgentCont);
+    buildAccordion(groupsActive, activeCont);
+    buildLibrary(gamesWithEvents, libraryCont);
+    updateTimers();
 }
 
-function addToGroup(groupObj, event) {
-    if (!groupObj[event.game_key]) {
-        groupObj[event.game_key] = { meta: gamesMap[event.game_key], events: [] };
-    }
-    groupObj[event.game_key].events.push(event);
-}
-
-// --- 3. UI Builders ---
-function renderAccordionList(groupedData, domContainer) {
-    let sortedGroups = Object.values(groupedData);
-
-    if (sortBy === 'alpha') {
-        sortedGroups.sort((a, b) => a.meta.display_name.localeCompare(b.meta.display_name));
-    } else {
-        sortedGroups.sort((a, b) => {
-            const getMin = (g) => Math.min(...g.events.map(e => new Date(e.end_datetime_utc).getTime())) || 9999999999999;
-            return getMin(a) - getMin(b);
-        });
-    }
-
-    sortedGroups.forEach((group) => {
-        const game = group.meta;
-        group.events.sort((a, b) => new Date(a.end_datetime_utc) - new Date(b.end_datetime_utc));
-
-        const section = document.createElement("div");
-        section.className = "game-section";
-        if(searchQuery) section.classList.add("open"); 
-
-        // Header
-        const header = document.createElement("div");
-        header.className = "game-header";
-        header.innerHTML = `
-            <img src="${game.cover_image}" alt="${game.display_name}">
-            <h3>${game.display_name}</h3>
-            <span class="game-arrow">▶</span>
+function buildAccordion(data, container) {
+    Object.values(data).forEach(group => {
+        const sec = document.createElement("div");
+        sec.className = "game-section";
+        sec.innerHTML = `
+            <div class="game-header">
+                <img src="${group.meta.cover_image}">
+                <h3>${group.meta.display_name}</h3>
+                <span class="game-arrow">▶</span>
+            </div>
+            <div class="events-container"></div>
         `;
-        header.addEventListener("click", () => section.classList.toggle("open"));
-
-        // Events Inside
-        const eventsDiv = document.createElement("div");
-        eventsDiv.className = "events-container";
-
-        group.events.forEach((ev) => {
-            // "New" Badge Logic (Assumes timestamp exists, or just ignores)
-            let isNew = false;
-            if(ev.timestamp) {
-                const createdDate = new Date(ev.timestamp);
-                isNew = (new Date() - createdDate) < (24 * 60 * 60 * 1000);
-            }
-
+        
+        const eventsDiv = sec.querySelector(".events-container");
+        group.events.forEach(ev => {
             const card = document.createElement("div");
             card.className = "event-card";
             card.innerHTML = `
-                <div class="event-top">
-                    <span class="event-title">
-                        ${ev.event_title}
-                        ${isNew ? '<span class="badge-new">New</span>' : ''}
-                    </span>
-                    <span class="event-tag">${ev.type}</span>
-                </div>
-                <div class="countdown" data-date="${ev.end_datetime_utc}">Loading...</div>
-                <div class="submitter">By ${ev.submitted_by}</div>
+                <div class="event-top"><strong>${ev.event_title}</strong><span>${ev.type}</span></div>
+                <div class="countdown" data-date="${ev.end_datetime_utc}">--</div>
             `;
             eventsDiv.appendChild(card);
         });
 
-        section.appendChild(header);
-        section.appendChild(eventsDiv);
-        domContainer.appendChild(section);
+        sec.querySelector(".game-header").onclick = () => sec.classList.toggle("open");
+        container.appendChild(sec);
     });
 }
 
-function renderLibraryList(gamesList, domContainer) {
-    gamesList.sort((a, b) => a.display_name.localeCompare(b.display_name));
-    gamesList.forEach(game => {
+function buildLibrary(activeSet, container) {
+    const libGrid = document.createElement("div");
+    libGrid.className = "library-grid";
+    Object.values(gamesMap).forEach(g => {
+        if (activeSet.has(g.game_key)) return;
         const card = document.createElement("div");
         card.className = "library-card";
-        card.innerHTML = `
-            <img src="${game.cover_image}" alt="${game.display_name}">
-            <h3>${game.display_name}</h3>
-            <div class="library-overlay">
-                <p>No active events.</p>
-                <a href="mailto:dontmissoutdev@gmail.com?subject=Event Report for ${game.display_name}" class="email-link">Tell us!</a>
-            </div>
-        `;
-        domContainer.appendChild(card);
+        card.innerHTML = `<img src="${g.cover_image}"><h3>${g.display_name}</h3>`;
+        libGrid.appendChild(card);
     });
+    container.appendChild(libGrid);
 }
 
-// --- 4. Timers ---
 function updateTimers() {
-    const now = new Date();
     document.querySelectorAll('.countdown').forEach(el => {
-        const endDate = new Date(el.dataset.date);
-        const total = endDate - now;
-        if (total <= 0) {
-            el.innerText = "Event Ended";
-            el.parentElement.classList.add("expired");
-            return;
-        }
-        const d = Math.floor(total / (1000 * 60 * 60 * 24));
-        const h = Math.floor((total / (1000 * 60 * 60)) % 24);
-        const m = Math.floor((total / 1000 / 60) % 60);
-        const s = Math.floor((total / 1000) % 60);
+        const t = new Date(el.dataset.date) - new Date();
+        if (t <= 0) return el.innerText = "Ended";
+        const d = Math.floor(t / 86400000), h = Math.floor((t / 3600000) % 24), m = Math.floor((t / 60000) % 60), s = Math.floor((t / 1000) % 60);
         el.innerText = `${d}d ${h}h ${m}m ${s}s`;
     });
 }
 
-// --- 5. Modal & Subscription ---
+// Subscription Modal Logic
 function renderSubscriptionList() {
-    const container = document.getElementById('game-subscription-list');
-    container.innerHTML = ''; 
-    const allGames = Object.values(gamesMap).sort((a, b) => a.display_name.localeCompare(b.display_name));
-    
-    allGames.forEach(game => {
-        const label = document.createElement('label');
-        label.className = 'checkbox-item';
-        const input = document.createElement('input');
-        input.type = 'checkbox';
-        input.value = game.display_name;
-        input.checked = true; 
-        label.appendChild(input);
-        label.appendChild(document.createTextNode(game.display_name));
-        container.appendChild(label);
+    const cont = document.getElementById('game-subscription-list');
+    cont.innerHTML = '';
+    Object.values(gamesMap).sort((a,b) => a.display_name.localeCompare(b.display_name)).forEach(g => {
+        const item = document.createElement('label');
+        item.className = 'checkbox-item';
+        item.innerHTML = `<input type="checkbox" value="${g.display_name}" checked>${g.display_name}`;
+        cont.appendChild(item);
     });
 }
 
-const toggleBtn = document.getElementById('toggleAllGames');
-toggleBtn.addEventListener('click', () => {
-    const checkboxes = document.querySelectorAll('#game-subscription-list input[type="checkbox"]');
-    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-    checkboxes.forEach(cb => cb.checked = !allChecked);
-    toggleBtn.innerText = allChecked ? "Select All" : "Deselect All";
+// Initial Load
+Promise.all([
+    fetch(GAMES_URL).then(r => r.text()),
+    fetch(SUBMISSIONS_URL).then(r => r.text())
+]).then(([gCSV, sCSV]) => {
+    parseCSV(gCSV).forEach(g => gamesMap[g.game_key] = g);
+    submissions = parseCSV(sCSV);
+    renderEvents();
+    setInterval(updateTimers, 1000);
 });
 
-document.getElementById('subscribeForm').onsubmit = function(e) {
-    e.preventDefault();
-    const email = document.getElementById('userEmail').value;
-    const btn = document.querySelector('.subscribe-submit');
-    const selectedGames = [];
-    document.querySelectorAll('#game-subscription-list input[type="checkbox"]:checked').forEach(cb => selectedGames.push(cb.value));
-
-    if (selectedGames.length === 0) { alert("Please select at least one game."); return; }
-
-    const originalText = btn.innerText;
-    btn.innerText = "Sending...";
-    btn.disabled = true;
-
-    emailjs.send(SERVICE_ID, TEMPLATE_ID, {
-        user_email: email,
-        message: selectedGames.join(", ")
-    }).then(function() {
-        alert('Success! You are subscribed.');
-        document.getElementById("notifyModal").style.display = "none";
-        btn.innerText = originalText;
-        btn.disabled = false;
-    }, function(error) {
-        console.error('FAILED...', error);
-        alert('Failed to subscribe. Please try again.');
-        btn.innerText = originalText;
-        btn.disabled = false;
-    });
+// Theme Switcher
+const themes = ['dark', 'sunrise', 'light', 'sunset'];
+let tIdx = 0;
+document.getElementById('themeToggle').onclick = () => {
+    tIdx = (tIdx + 1) % themes.length;
+    document.body.setAttribute('data-theme', themes[tIdx]);
 };
 
+// Search
+document.getElementById("searchInput").oninput = (e) => {
+    searchQuery = e.target.value.toLowerCase();
+    renderEvents();
+};
+
+// Category Toggle
+document.querySelectorAll('.category-header').forEach(h => {
+    h.onclick = () => h.parentElement.classList.toggle('collapsed');
+});
+
+// Modal Logic
 const modal = document.getElementById("notifyModal");
 document.getElementById("openNotify").onclick = () => { modal.style.display = "flex"; renderSubscriptionList(); };
 document.querySelector(".close-modal").onclick = () => modal.style.display = "none";
-window.onclick = (e) => { if (e.target == modal) modal.style.display = "none"; };
 
-// --- 6. Themes ---
-const themeBtn = document.getElementById('themeToggle');
-const themeIcon = document.getElementById('themeIcon');
-const themes = ['dark', 'sunrise', 'light', 'sunset'];
-let currentThemeIndex = 0;
-
-themeBtn.addEventListener('click', () => {
-    currentThemeIndex = (currentThemeIndex + 1) % themes.length;
-    const newTheme = themes[currentThemeIndex];
-    
-    themeIcon.parentElement.classList.remove('animate-icon');
-    void themeIcon.offsetWidth; 
-    themeIcon.parentElement.classList.add('animate-icon');
-
-    setTimeout(() => {
-        document.body.setAttribute('data-theme', newTheme);
-        if (newTheme === 'sunrise') themeIcon.className = 'fa-solid fa-mountain-sun';
-        else if (newTheme === 'light') themeIcon.className = 'fa-solid fa-sun';
-        else if (newTheme === 'sunset') themeIcon.className = 'fa-solid fa-cloud-sun';
-        else themeIcon.className = 'fa-solid fa-moon';
-    }, 250);
-});
-
-// --- 7. Initialization ---
-document.querySelectorAll('.category-header').forEach(header => {
-    header.addEventListener('click', function() { this.parentElement.classList.toggle('collapsed'); });
-});
-
-document.getElementById("searchInput").addEventListener("input", (e) => {
-    searchQuery = e.target.value.toLowerCase();
-    renderEvents();
-});
-
-document.getElementById("sortSelect").addEventListener("change", (e) => {
-    sortBy = e.target.value;
-    renderEvents();
-});
-
-Promise.all([
-  fetch(GAMES_URL).then(r => r.text()),
-  fetch(SUBMISSIONS_URL).then(r => r.text()),
-]).then(([gamesCSV, subsCSV]) => {
-  const gamesList = parseCSV(gamesCSV);
-  gamesList.forEach(g => { gamesMap[g.game_key] = g; });
-  submissions = parseCSV(subsCSV);
-
-  renderEvents();
-  renderSubscriptionList(); 
-  setInterval(updateTimers, 1000);
-});
+document.getElementById('subscribeForm').onsubmit = (e) => {
+    e.preventDefault();
+    const selected = Array.from(document.querySelectorAll('#game-subscription-list input:checked')).map(i => i.value);
+    emailjs.send(SERVICE_ID, TEMPLATE_ID, { user_email: document.getElementById('userEmail').value, message: selected.join(", ") })
+    .then(() => { alert("Subscribed!"); modal.style.display="none"; });
+};
