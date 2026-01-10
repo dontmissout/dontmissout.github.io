@@ -1,6 +1,6 @@
+// --- Constants & Config ---
 const GAMES_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR76r__p7DDeh0CKE8pXB1Z1xDKXAkbtdauoyL4aYyeDrXQkbiOyojWIGl4WTxwcbdf4BaMtJ-FwPm9/pub?gid=623150298&single=true&output=csv";
 const SUBMISSIONS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR76r__p7DDeh0CKE8pXB1Z1xDKXAkbtdauoyL4aYyeDrXQkbiOyojWIGl4WTxwcbdf4BaMtJ-FwPm9/pub?gid=0&single=true&output=csv";
-
 const SERVICE_ID = "service_yfaukwg";
 const TEMPLATE_ID = "template_rmz7ocl";
 
@@ -9,120 +9,154 @@ let submissions = [];
 let searchQuery = "";
 let sortBy = "soonest";
 
-// CSV Parser
+// --- Data Fetching ---
 function parseCSV(text) {
     const lines = text.trim().split("\n");
     const headers = lines.shift().split(",").map(h => h.trim());
     return lines.map(line => {
         const values = line.split(",");
         const obj = {};
-        headers.forEach((h, i) => { obj[h] = values[i] ? values[i].trim() : ""; });
+        headers.forEach((h, i) => { obj[h] = values[i]?.trim() || ""; });
         return obj;
     });
 }
 
-// Render Core
 function renderEvents() {
-    const urgentCont = document.getElementById("container-urgent");
-    const activeCont = document.getElementById("container-active");
-    const libraryCont = document.getElementById("container-library");
+    const urgentBox = document.getElementById("container-urgent");
+    const activeBox = document.getElementById("container-active");
+    const libraryBox = document.getElementById("container-library");
+    
+    urgentBox.innerHTML = ""; activeBox.innerHTML = ""; libraryBox.innerHTML = "";
 
-    urgentCont.innerHTML = "";
-    activeCont.innerHTML = "";
-    libraryCont.innerHTML = "";
-
-    const groupsActive = {};
-    const groupsUrgent = {};
+    const activeGroups = {};
+    const urgentGroups = {};
     const gamesWithEvents = new Set();
     const now = new Date();
-    const urgentTime = 48 * 60 * 60 * 1000;
 
     submissions.forEach(e => {
         if (e.approved !== "TRUE" || !gamesMap[e.game_key]) return;
-        
-        const end = new Date(e.end_datetime_utc);
-        if (isNaN(end.getTime()) || now > end) return;
+        const endDate = new Date(e.end_datetime_utc);
+        if (isNaN(endDate) || now > endDate) return;
 
-        const text = `${gamesMap[e.game_key].display_name} ${e.event_title}`.toLowerCase();
-        if (searchQuery && !text.includes(searchQuery)) return;
+        const searchText = `${gamesMap[e.game_key].display_name} ${e.event_title}`.toLowerCase();
+        if (searchQuery && !searchText.includes(searchQuery)) return;
 
         gamesWithEvents.add(e.game_key);
-        const targetGroup = (end - now <= urgentTime) ? groupsUrgent : groupsActive;
+        const diff = endDate - now;
+        const targetGroup = diff < (48 * 60 * 60 * 1000) ? urgentGroups : activeGroups;
         
         if (!targetGroup[e.game_key]) targetGroup[e.game_key] = { meta: gamesMap[e.game_key], events: [] };
         targetGroup[e.game_key].events.push(e);
     });
 
-    buildAccordion(groupsUrgent, urgentCont);
-    buildAccordion(groupsActive, activeCont);
-    buildLibrary(gamesWithEvents, libraryCont);
+    // Populate UI
+    buildAccordion(urgentGroups, urgentBox);
+    buildAccordion(activeGroups, activeBox);
+    
+    // Library
+    Object.values(gamesMap).forEach(g => {
+        if (!gamesWithEvents.has(g.game_key)) {
+            const card = document.createElement("div");
+            card.className = "library-card";
+            card.innerHTML = `<img src="${g.cover_image}"><h4>${g.display_name}</h4>`;
+            libraryBox.appendChild(card);
+        }
+    });
     updateTimers();
 }
 
 function buildAccordion(data, container) {
     Object.values(data).forEach(group => {
-        const sec = document.createElement("div");
-        sec.className = "game-section";
-        sec.innerHTML = `
+        const section = document.createElement("div");
+        section.className = "game-section";
+        section.innerHTML = `
             <div class="game-header">
                 <img src="${group.meta.cover_image}">
-                <h3>${group.meta.display_name}</h3>
-                <span class="game-arrow">▶</span>
+                <span>${group.meta.display_name}</span>
             </div>
             <div class="events-container"></div>
         `;
-        
-        const eventsDiv = sec.querySelector(".events-container");
+        const eventBox = section.querySelector(".events-container");
         group.events.forEach(ev => {
-            const card = document.createElement("div");
-            card.className = "event-card";
-            card.innerHTML = `
-                <div class="event-top"><strong>${ev.event_title}</strong><span>${ev.type}</span></div>
-                <div class="countdown" data-date="${ev.end_datetime_utc}">--</div>
-            `;
-            eventsDiv.appendChild(card);
+            const el = document.createElement("div");
+            el.className = "event-card";
+            el.innerHTML = `<strong>${ev.event_title}</strong><div class="countdown" data-date="${ev.end_datetime_utc}"></div>`;
+            eventBox.appendChild(el);
         });
-
-        sec.querySelector(".game-header").onclick = () => sec.classList.toggle("open");
-        container.appendChild(sec);
+        section.querySelector(".game-header").onclick = () => section.classList.toggle("open");
+        container.appendChild(section);
     });
-}
-
-function buildLibrary(activeSet, container) {
-    const libGrid = document.createElement("div");
-    libGrid.className = "library-grid";
-    Object.values(gamesMap).forEach(g => {
-        if (activeSet.has(g.game_key)) return;
-        const card = document.createElement("div");
-        card.className = "library-card";
-        card.innerHTML = `<img src="${g.cover_image}"><h3>${g.display_name}</h3>`;
-        libGrid.appendChild(card);
-    });
-    container.appendChild(libGrid);
 }
 
 function updateTimers() {
-    document.querySelectorAll('.countdown').forEach(el => {
-        const t = new Date(el.dataset.date) - new Date();
-        if (t <= 0) return el.innerText = "Ended";
-        const d = Math.floor(t / 86400000), h = Math.floor((t / 3600000) % 24), m = Math.floor((t / 60000) % 60), s = Math.floor((t / 1000) % 60);
-        el.innerText = `${d}d ${h}h ${m}m ${s}s`;
+    const now = new Date();
+    document.querySelectorAll(".countdown").forEach(el => {
+        const diff = new Date(el.dataset.date) - now;
+        if (diff <= 0) { el.innerText = "Ended"; return; }
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        el.innerText = `${h}h ${m}m ${s}s`;
     });
 }
 
-// Subscription Modal Logic
-function renderSubscriptionList() {
-    const cont = document.getElementById('game-subscription-list');
-    cont.innerHTML = '';
-    Object.values(gamesMap).sort((a,b) => a.display_name.localeCompare(b.display_name)).forEach(g => {
-        const item = document.createElement('label');
-        item.className = 'checkbox-item';
-        item.innerHTML = `<input type="checkbox" value="${g.display_name}" checked>${g.display_name}`;
-        cont.appendChild(item);
+// --- Subscription Modal ---
+function renderSubList() {
+    const box = document.getElementById("game-subscription-list");
+    box.innerHTML = "";
+    Object.values(gamesMap).forEach(g => {
+        const item = document.createElement("label");
+        item.className = "checkbox-item";
+        item.innerHTML = `<input type="checkbox" value="${g.display_name}" checked> ${g.display_name}`;
+        box.appendChild(item);
     });
 }
 
-// Initial Load
+document.getElementById("subscribeForm").onsubmit = (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector("button");
+    const selected = Array.from(document.querySelectorAll("#game-subscription-list input:checked")).map(i => i.value);
+    
+    btn.innerText = "Sending...";
+    emailjs.send(SERVICE_ID, TEMPLATE_ID, {
+        user_email: document.getElementById("userEmail").value,
+        message: selected.join(", ")
+    }).then(() => {
+        alert("Subscribed!");
+        document.getElementById("notifyModal").style.display = "none";
+        btn.innerText = "Subscribe";
+    });
+};
+
+// --- Themes & UI Init ---
+const themeBtn = document.getElementById('themeToggle');
+const themes = ['dark', 'sunrise', 'light', 'sunset'];
+let tIdx = 0;
+
+themeBtn.onclick = () => {
+    tIdx = (tIdx + 1) % themes.length;
+    const t = themes[tIdx];
+    document.body.setAttribute('data-theme', t);
+    document.getElementById("themeIcon").className = `fa-solid fa-${t === 'dark' ? 'moon' : t === 'light' ? 'sun' : 'mountain-sun'}`;
+};
+
+document.getElementById("openNotify").onclick = () => {
+    document.getElementById("notifyModal").style.display = "flex";
+    renderSubList();
+};
+
+document.querySelector(".close-modal").onclick = () => document.getElementById("notifyModal").style.display = "none";
+
+document.getElementById("searchInput").oninput = (e) => {
+    searchQuery = e.target.value.toLowerCase();
+    renderEvents();
+};
+
+document.querySelectorAll(".category-header").forEach(h => {
+    h.onclick = () => h.parentElement.classList.toggle("collapsed");
+});
+
+// Start
 Promise.all([
     fetch(GAMES_URL).then(r => r.text()),
     fetch(SUBMISSIONS_URL).then(r => r.text())
@@ -132,34 +166,3 @@ Promise.all([
     renderEvents();
     setInterval(updateTimers, 1000);
 });
-
-// Theme Switcher
-const themes = ['dark', 'sunrise', 'light', 'sunset'];
-let tIdx = 0;
-document.getElementById('themeToggle').onclick = () => {
-    tIdx = (tIdx + 1) % themes.length;
-    document.body.setAttribute('data-theme', themes[tIdx]);
-};
-
-// Search
-document.getElementById("searchInput").oninput = (e) => {
-    searchQuery = e.target.value.toLowerCase();
-    renderEvents();
-};
-
-// Category Toggle
-document.querySelectorAll('.category-header').forEach(h => {
-    h.onclick = () => h.parentElement.classList.toggle('collapsed');
-});
-
-// Modal Logic
-const modal = document.getElementById("notifyModal");
-document.getElementById("openNotify").onclick = () => { modal.style.display = "flex"; renderSubscriptionList(); };
-document.querySelector(".close-modal").onclick = () => modal.style.display = "none";
-
-document.getElementById('subscribeForm').onsubmit = (e) => {
-    e.preventDefault();
-    const selected = Array.from(document.querySelectorAll('#game-subscription-list input:checked')).map(i => i.value);
-    emailjs.send(SERVICE_ID, TEMPLATE_ID, { user_email: document.getElementById('userEmail').value, message: selected.join(", ") })
-    .then(() => { alert("Subscribed!"); modal.style.display="none"; });
-};
