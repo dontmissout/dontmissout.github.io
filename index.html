@@ -7,7 +7,136 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Event Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+       (function(){
+          // REPLACE THIS WITH YOUR ACTUAL PUBLIC KEY FROM EMAILJS DASHBOARD
+          emailjs.init("YOUR_PUBLIC_KEY_HERE");
+       })();
+    </script>
+</head>
+<body>
 
+  <div class="bg-mesh"></div>
+
+  <header class="main-header">
+    <div class="logo-area">
+      <div class="logo-placeholder">
+        <i class="fa-solid fa-gamepad"></i>
+      </div>
+      <div class="title-group">
+        <h1>EventTracker</h1>
+        <p>Don't miss the drop</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button id="themeToggle" class="theme-btn" title="Switch Theme">
+        <div class="theme-icon-container">
+          <i id="themeIcon" class="fa-solid fa-moon"></i>
+        </div>
+      </button>
+      <div class="version-control">
+        <div class="help-icon">?</div>
+        <div class="tooltip-content">
+          <h3>Changelog</h3>
+          <ul>
+              <li><strong>v1.4:</strong> Subscription Filter Added</li>
+              <li><strong>v1.3:</strong> Active & Library sections</li>
+          </ul>
+          <div class="version-number">Ver: 1.4.0</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="notification-banner">
+      <div class="notify-content">
+          <div style="display:flex; align-items:center; gap:10px;">
+              <i class="fa-solid fa-bell-ring"></i>
+              <span>Get notified when new events drop!</span>
+          </div>
+          <button id="openNotify" class="notify-btn-small">Notify Me</button>
+      </div>
+  </section>
+
+  <div class="controls-container">
+    <div class="search-wrapper">
+      <i class="fa-solid fa-magnifying-glass search-icon"></i>
+      <input type="text" id="searchInput" placeholder="Search games, events...">
+    </div>
+    
+    <div class="sort-wrapper">
+      <select id="sortSelect">
+        <option value="soonest">Sort: Ending Soonest</option>
+        <option value="alpha">Sort: Name (A-Z)</option>
+      </select>
+    </div>
+  </div>
+
+  <main>
+    <section class="category-section" id="section-urgent">
+      <div class="category-header">
+        <h2><i class="fa-solid fa-fire-flame-curved" style="color: #ef4444;"></i> Ending Soon (48h)</h2>
+        <span class="category-arrow">▼</span>
+      </div>
+      <div class="category-content" id="container-urgent"></div>
+    </section>
+
+    <section class="category-section" id="section-active">
+      <div class="category-header">
+        <h2><i class="fa-solid fa-bolt" style="color: #fbbf24;"></i> Active Events</h2>
+        <span class="category-arrow">▼</span>
+      </div>
+      <div class="category-content" id="container-active"></div>
+    </section>
+
+    <section class="category-section collapsed" id="section-library">
+      <div class="category-header">
+        <h2><i class="fa-solid fa-layer-group" style="color: #94a3b8;"></i> All Games / No Events</h2>
+        <span class="category-arrow">▼</span>
+      </div>
+      <div class="category-content">
+        <div id="container-library" class="library-grid"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="notifyModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Stay in the Loop</h2>
+        <p>Select the games you want to track.</p>
+        
+        <form id="subscribeForm">
+            <input type="email" id="userEmail" placeholder="Enter your email address" required>
+            
+            <div class="subscription-controls">
+                <span style="font-size:0.8rem; color:var(--text-muted);">Uncheck games to ignore them</span>
+                <button type="button" id="toggleAllGames" class="text-btn">Deselect All</button>
+            </div>
+
+            <div id="game-subscription-list" class="game-checkbox-list">
+                </div>
+
+            <button type="submit" class="subscribe-submit">Subscribe</button>
+        </form>
+        <p class="disclaimer">No spam. Only drops for games you choose.</p>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
 <body>
 <section class="notification-banner">
     <div class="notify-content">
@@ -111,5 +240,6 @@
   <script src="script.js"></script>
 </body>
 </html>
+
 
 
