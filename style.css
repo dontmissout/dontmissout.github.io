@@ -263,3 +263,81 @@ input:focus, select:focus { outline: none; border-color: var(--accent); box-shad
     .tooltip-content { right: 50%; transform: translateX(50%) translateY(10px); top: 100%; }
     .version-control:hover .tooltip-content { transform: translateX(50%) translateY(0); }
 }
+
+/* --- Theme Variables --- */
+:root {
+    /* Default Dark Mode (Your current style) */
+    --bg-dark: #0f172a;
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --accent: #38bdf8;
+    --text-main: #f1f5f9;
+    --text-muted: #94a3b8;
+    --border: rgba(255, 255, 255, 0.08);
+}
+
+/* Sunrise Theme (Warm Orange) */
+[data-theme="sunrise"] {
+    --bg-dark: #fef3c7;
+    --card-bg: rgba(255, 255, 255, 0.8);
+    --accent: #f59e0b;
+    --text-main: #451a03;
+    --text-muted: #92400e;
+    --border: rgba(245, 158, 11, 0.2);
+}
+
+/* Light Theme (Clean White) */
+[data-theme="light"] {
+    --bg-dark: #f8fafc;
+    --card-bg: rgba(255, 255, 255, 0.9);
+    --accent: #2563eb;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border: rgba(0, 0, 0, 0.05);
+}
+
+/* Sunset Theme (Deep Purple) */
+[data-theme="sunset"] {
+    --bg-dark: #2e1065;
+    --card-bg: rgba(76, 29, 149, 0.4);
+    --accent: #d946ef;
+    --text-main: #f5f3ff;
+    --text-muted: #c4b5fd;
+    --border: rgba(217, 70, 239, 0.2);
+}
+
+body {
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+/* --- Theme Button & Animation --- */
+.header-actions { display: flex; align-items: center; gap: 15px; }
+
+.theme-btn {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.theme-btn:active { transform: scale(0.9); }
+
+.theme-icon-container {
+    transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Icon Rise/Set Animation class added via JS */
+.animate-icon {
+    animation: sunMove 0.5s forwards;
+}
+
+@keyframes sunMove {
+    0% { transform: translateY(0); opacity: 1; }
+    45% { transform: translateY(-30px); opacity: 0; }
+    55% { transform: translateY(30px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
