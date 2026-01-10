@@ -1,11 +1,18 @@
+// --- Configuration ---
 const GAMES_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR76r__p7DDeh0CKE8pXB1Z1xDKXAkbtdauoyL4aYyeDrXQkbiOyojWIGl4WTxwcbdf4BaMtJ-FwPm9/pub?gid=623150298&single=true&output=csv";
 const SUBMISSIONS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR76r__p7DDeh0CKE8pXB1Z1xDKXAkbtdauoyL4aYyeDrXQkbiOyojWIGl4WTxwcbdf4BaMtJ-FwPm9/pub?gid=0&single=true&output=csv";
 
+// User's EmailJS Config
+const SERVICE_ID = "service_yfaukwg";
+const TEMPLATE_ID = "template_rmz7ocl";
+
+// State
 let gamesMap = {};
 let submissions = [];
 let searchQuery = "";
 let sortBy = "soonest"; 
 
+// --- 1. Data Parsing ---
 function parseCSV(text) {
   const lines = text.trim().split("\n");
   const headers = lines.shift().split(",").map(h => h.trim());
@@ -17,6 +24,7 @@ function parseCSV(text) {
   });
 }
 
+// --- 2. Main Render Logic ---
 function renderEvents() {
   const urgentContainer = document.getElementById("container-urgent");
   const activeContainer = document.getElementById("container-active");
@@ -28,18 +36,16 @@ function renderEvents() {
 
   const groupsActive = {};
   const groupsUrgent = {};
-  
-  // Keep track of which games have active events
   const gamesWithEvents = new Set();
   
   const now = new Date();
   const urgentThreshold = 48 * 60 * 60 * 1000; // 48 Hours
 
-  // 1. Process Active Events
   submissions.forEach((e) => {
     if (e.approved !== "TRUE") return;
     if (!gamesMap[e.game_key]) return;
 
+    // Search Filtering
     const searchText = `${gamesMap[e.game_key].display_name} ${e.event_title} ${e.type}`.toLowerCase();
     if (searchQuery && !searchText.includes(searchQuery)) return;
 
@@ -47,9 +53,7 @@ function renderEvents() {
     if (isNaN(endDate.getTime())) return;
     if (now > endDate) return; // Expired
 
-    // Mark this game as having something happening
     gamesWithEvents.add(e.game_key);
-
     const timeDiff = endDate - now;
 
     if (timeDiff <= urgentThreshold) {
@@ -59,42 +63,35 @@ function renderEvents() {
     }
   });
 
-  // 2. Process Library (Games with NO active events)
+  // Library Logic (Games with no active events)
   const libraryGames = [];
   Object.values(gamesMap).forEach(game => {
-      // If searching, filter library too
       if (searchQuery && !game.display_name.toLowerCase().includes(searchQuery)) return;
-
-      // Only add if it DOESN'T have an active event
       if (!gamesWithEvents.has(game.game_key)) {
           libraryGames.push(game);
       }
   });
 
-  // 3. Render
+  // Execute Renders
   renderAccordionList(groupsUrgent, urgentContainer);
   renderAccordionList(groupsActive, activeContainer);
   renderLibraryList(libraryGames, libraryContainer);
   
-  // Empty State Handlers
-  if (Object.keys(groupsUrgent).length === 0) urgentContainer.innerHTML = "<div style='padding:20px; color:#94a3b8; text-align:center;'>No urgent events.</div>";
-  if (Object.keys(groupsActive).length === 0) activeContainer.innerHTML = "<div style='padding:20px; color:#94a3b8; text-align:center;'>No active events.</div>";
+  // Empty States
+  if (Object.keys(groupsUrgent).length === 0) urgentContainer.innerHTML = "<div style='padding:20px; color:var(--text-muted); text-align:center;'>No urgent events.</div>";
+  if (Object.keys(groupsActive).length === 0) activeContainer.innerHTML = "<div style='padding:20px; color:var(--text-muted); text-align:center;'>No active events.</div>";
   
   updateTimers();
 }
 
-// Helper: Add to dictionary
 function addToGroup(groupObj, event) {
     if (!groupObj[event.game_key]) {
-        groupObj[event.game_key] = {
-            meta: gamesMap[event.game_key],
-            events: []
-        };
+        groupObj[event.game_key] = { meta: gamesMap[event.game_key], events: [] };
     }
     groupObj[event.game_key].events.push(event);
 }
 
-// Helper: Render standard Accordions (Active/Urgent)
+// --- 3. UI Builders ---
 function renderAccordionList(groupedData, domContainer) {
     let sortedGroups = Object.values(groupedData);
 
@@ -115,6 +112,7 @@ function renderAccordionList(groupedData, domContainer) {
         section.className = "game-section";
         if(searchQuery) section.classList.add("open"); 
 
+        // Header
         const header = document.createElement("div");
         header.className = "game-header";
         header.innerHTML = `
@@ -124,15 +122,26 @@ function renderAccordionList(groupedData, domContainer) {
         `;
         header.addEventListener("click", () => section.classList.toggle("open"));
 
+        // Events Inside
         const eventsDiv = document.createElement("div");
         eventsDiv.className = "events-container";
 
         group.events.forEach((ev) => {
+            // "New" Badge Logic (Assumes timestamp exists, or just ignores)
+            let isNew = false;
+            if(ev.timestamp) {
+                const createdDate = new Date(ev.timestamp);
+                isNew = (new Date() - createdDate) < (24 * 60 * 60 * 1000);
+            }
+
             const card = document.createElement("div");
             card.className = "event-card";
             card.innerHTML = `
                 <div class="event-top">
-                    <span class="event-title">${ev.event_title}</span>
+                    <span class="event-title">
+                        ${ev.event_title}
+                        ${isNew ? '<span class="badge-new">New</span>' : ''}
+                    </span>
                     <span class="event-tag">${ev.type}</span>
                 </div>
                 <div class="countdown" data-date="${ev.end_datetime_utc}">Loading...</div>
@@ -147,11 +156,8 @@ function renderAccordionList(groupedData, domContainer) {
     });
 }
 
-// Helper: Render Library Grid (Quiet games)
 function renderLibraryList(gamesList, domContainer) {
-    // Always alphabetical for library
     gamesList.sort((a, b) => a.display_name.localeCompare(b.display_name));
-
     gamesList.forEach(game => {
         const card = document.createElement("div");
         card.className = "library-card";
@@ -159,8 +165,7 @@ function renderLibraryList(gamesList, domContainer) {
             <img src="${game.cover_image}" alt="${game.display_name}">
             <h3>${game.display_name}</h3>
             <div class="library-overlay">
-                <p>No events yet.</p>
-                <p style="font-size:0.75rem; color:#94a3b8; margin-bottom:12px;">Think this is a mistake?</p>
+                <p>No active events.</p>
                 <a href="mailto:dontmissoutdev@gmail.com?subject=Event Report for ${game.display_name}" class="email-link">Tell us!</a>
             </div>
         `;
@@ -168,43 +173,112 @@ function renderLibraryList(gamesList, domContainer) {
     });
 }
 
+// --- 4. Timers ---
 function updateTimers() {
     const now = new Date();
     document.querySelectorAll('.countdown').forEach(el => {
         const endDate = new Date(el.dataset.date);
         const total = endDate - now;
-
         if (total <= 0) {
             el.innerText = "Event Ended";
             el.parentElement.classList.add("expired");
             return;
         }
-
         const d = Math.floor(total / (1000 * 60 * 60 * 24));
         const h = Math.floor((total / (1000 * 60 * 60)) % 24);
         const m = Math.floor((total / 1000 / 60) % 60);
         const s = Math.floor((total / 1000) % 60);
-
         el.innerText = `${d}d ${h}h ${m}m ${s}s`;
     });
 }
 
-document.querySelectorAll('.category-header').forEach(header => {
-    header.addEventListener('click', function() {
-        this.parentElement.classList.toggle('collapsed');
+// --- 5. Modal & Subscription ---
+function renderSubscriptionList() {
+    const container = document.getElementById('game-subscription-list');
+    container.innerHTML = ''; 
+    const allGames = Object.values(gamesMap).sort((a, b) => a.display_name.localeCompare(b.display_name));
+    
+    allGames.forEach(game => {
+        const label = document.createElement('label');
+        label.className = 'checkbox-item';
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.value = game.display_name;
+        input.checked = true; 
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(game.display_name));
+        container.appendChild(label);
     });
+}
+
+const toggleBtn = document.getElementById('toggleAllGames');
+toggleBtn.addEventListener('click', () => {
+    const checkboxes = document.querySelectorAll('#game-subscription-list input[type="checkbox"]');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    checkboxes.forEach(cb => cb.checked = !allChecked);
+    toggleBtn.innerText = allChecked ? "Select All" : "Deselect All";
 });
 
-Promise.all([
-  fetch(GAMES_URL).then(r => r.text()),
-  fetch(SUBMISSIONS_URL).then(r => r.text()),
-]).then(([gamesCSV, subsCSV]) => {
-  const gamesList = parseCSV(gamesCSV);
-  gamesList.forEach(g => { gamesMap[g.game_key] = g; });
-  submissions = parseCSV(subsCSV);
+document.getElementById('subscribeForm').onsubmit = function(e) {
+    e.preventDefault();
+    const email = document.getElementById('userEmail').value;
+    const btn = document.querySelector('.subscribe-submit');
+    const selectedGames = [];
+    document.querySelectorAll('#game-subscription-list input[type="checkbox"]:checked').forEach(cb => selectedGames.push(cb.value));
 
-  renderEvents();
-  setInterval(updateTimers, 1000);
+    if (selectedGames.length === 0) { alert("Please select at least one game."); return; }
+
+    const originalText = btn.innerText;
+    btn.innerText = "Sending...";
+    btn.disabled = true;
+
+    emailjs.send(SERVICE_ID, TEMPLATE_ID, {
+        user_email: email,
+        message: selectedGames.join(", ")
+    }).then(function() {
+        alert('Success! You are subscribed.');
+        document.getElementById("notifyModal").style.display = "none";
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }, function(error) {
+        console.error('FAILED...', error);
+        alert('Failed to subscribe. Please try again.');
+        btn.innerText = originalText;
+        btn.disabled = false;
+    });
+};
+
+const modal = document.getElementById("notifyModal");
+document.getElementById("openNotify").onclick = () => { modal.style.display = "flex"; renderSubscriptionList(); };
+document.querySelector(".close-modal").onclick = () => modal.style.display = "none";
+window.onclick = (e) => { if (e.target == modal) modal.style.display = "none"; };
+
+// --- 6. Themes ---
+const themeBtn = document.getElementById('themeToggle');
+const themeIcon = document.getElementById('themeIcon');
+const themes = ['dark', 'sunrise', 'light', 'sunset'];
+let currentThemeIndex = 0;
+
+themeBtn.addEventListener('click', () => {
+    currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+    const newTheme = themes[currentThemeIndex];
+    
+    themeIcon.parentElement.classList.remove('animate-icon');
+    void themeIcon.offsetWidth; 
+    themeIcon.parentElement.classList.add('animate-icon');
+
+    setTimeout(() => {
+        document.body.setAttribute('data-theme', newTheme);
+        if (newTheme === 'sunrise') themeIcon.className = 'fa-solid fa-mountain-sun';
+        else if (newTheme === 'light') themeIcon.className = 'fa-solid fa-sun';
+        else if (newTheme === 'sunset') themeIcon.className = 'fa-solid fa-cloud-sun';
+        else themeIcon.className = 'fa-solid fa-moon';
+    }, 250);
+});
+
+// --- 7. Initialization ---
+document.querySelectorAll('.category-header').forEach(header => {
+    header.addEventListener('click', function() { this.parentElement.classList.toggle('collapsed'); });
 });
 
 document.getElementById("searchInput").addEventListener("input", (e) => {
@@ -217,185 +291,6 @@ document.getElementById("sortSelect").addEventListener("change", (e) => {
     renderEvents();
 });
 
-// Theme Controller
-const themeBtn = document.getElementById('themeToggle');
-const themeIcon = document.getElementById('themeIcon');
-const themes = ['dark', 'sunrise', 'light', 'sunset'];
-let currentThemeIndex = 0;
-
-themeBtn.addEventListener('click', () => {
-    // 1. Cycle Index
-    currentThemeIndex = (currentThemeIndex + 1) % themes.length;
-    const newTheme = themes[currentThemeIndex];
-    
-    // 2. Trigger Icon Animation
-    themeIcon.parentElement.classList.remove('animate-icon');
-    void themeIcon.offsetWidth; // Trigger reflow to restart animation
-    themeIcon.parentElement.classList.add('animate-icon');
-
-    // 3. Update Body Attribute
-    setTimeout(() => {
-        document.body.setAttribute('data-theme', newTheme);
-        
-        // 4. Update Icon Appearance
-        if (newTheme === 'sunrise') {
-            themeIcon.className = 'fa-solid fa-mountain-sun'; // Sunrise icon
-        } else if (newTheme === 'light') {
-            themeIcon.className = 'fa-solid fa-sun'; // Full sun
-        } else if (newTheme === 'sunset') {
-            themeIcon.className = 'fa-solid fa-cloud-sun'; // Sunset icon
-        } else {
-            themeIcon.className = 'fa-solid fa-moon'; // Dark mode
-        }
-    }, 250); // Change half-way through the animation
-});
-
-// Optional: Load preferred theme from localStorage if you want it to save
-const savedTheme = localStorage.getItem('user-theme');
-if (savedTheme) {
-    document.body.setAttribute('data-theme', savedTheme);
-    currentThemeIndex = themes.indexOf(savedTheme);
-    // Update icon to match
-}
-// --- Modal Logic ---
-const modal = document.getElementById("notifyModal");
-const openBtn = document.getElementById("openNotify");
-const closeBtn = document.querySelector(".close-modal");
-
-openBtn.onclick = () => modal.style.display = "flex";
-closeBtn.onclick = () => modal.style.display = "none";
-window.onclick = (event) => { if (event == modal) modal.style.display = "none"; }
-
-// --- Handle Subscription ---
-document.getElementById('subscribeForm').onsubmit = (e) => {
-    e.preventDefault();
-    const email = e.target.querySelector('input').value;
-    alert(`Success! We've added ${email} to our notification list.`);
-    modal.style.display = "none";
-    // NOTE: In a real app, you would fetch() an API here to save the email
-};
-
-// --- Updated Render Logic for "NEW" Badge ---
-// Inside your renderAccordionList function, where you create the event title:
-
-group.events.forEach((ev) => {
-    // Logic: If event was added in the last 24 hours
-    const createdDate = new Date(ev.timestamp); // Assumes you have a timestamp column
-    const isNew = (new Date() - createdDate) < (24 * 60 * 60 * 1000); 
-
-    const card = document.createElement("div");
-    card.className = "event-card";
-    card.innerHTML = `
-        <div class="event-top">
-            <span class="event-title">
-                ${ev.event_title}
-                ${isNew ? '<span class="badge-new">New</span>' : ''}
-            </span>
-            <span class="event-tag">${ev.type}</span>
-        </div>
-        <div class="countdown" data-date="${ev.end_datetime_utc}">Loading...</div>
-        <div class="submitter">By ${ev.submitted_by}</div>
-    `;
-    eventsDiv.appendChild(card);
-});
-
-// ... Keep your existing Constants and Variables ...
-const GAMES_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR76r__p7DDeh0CKE8pXB1Z1xDKXAkbtdauoyL4aYyeDrXQkbiOyojWIGl4WTxwcbdf4BaMtJ-FwPm9/pub?gid=623150298&single=true&output=csv";
-const SUBMISSIONS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR76r__p7DDeh0CKE8pXB1Z1xDKXAkbtdauoyL4aYyeDrXQkbiOyojWIGl4WTxwcbdf4BaMtJ-FwPm9/pub?gid=0&single=true&output=csv";
-
-let gamesMap = {};
-let submissions = [];
-let searchQuery = "";
-let sortBy = "soonest"; 
-
-// ... Keep parseCSV, renderEvents, addToGroup, etc ...
-// (I am omitting the middle parts to save space, keep your existing render logic)
-
-// 1. Logic to Populate Subscription List
-function renderSubscriptionList() {
-    const container = document.getElementById('game-subscription-list');
-    container.innerHTML = ''; // Clear it
-
-    // Get all games and sort alphabetically
-    const allGames = Object.values(gamesMap).sort((a, b) => a.display_name.localeCompare(b.display_name));
-
-    allGames.forEach(game => {
-        const label = document.createElement('label');
-        label.className = 'checkbox-item';
-        
-        // Create checkbox (Checked by default)
-        const input = document.createElement('input');
-        input.type = 'checkbox';
-        input.value = game.display_name;
-        input.checked = true; // Default to "Notify me about everything"
-
-        label.appendChild(input);
-        label.appendChild(document.createTextNode(game.display_name));
-        container.appendChild(label);
-    });
-}
-
-// 2. Toggle Select/Deselect All
-const toggleBtn = document.getElementById('toggleAllGames');
-toggleBtn.addEventListener('click', () => {
-    const checkboxes = document.querySelectorAll('#game-subscription-list input[type="checkbox"]');
-    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-    
-    // If all are checked, uncheck all. Otherwise, check all.
-    checkboxes.forEach(cb => cb.checked = !allChecked);
-    toggleBtn.innerText = allChecked ? "Select All" : "Deselect All";
-});
-
-// 3. Handle Form Submission with EmailJS
-document.getElementById('subscribeForm').onsubmit = function(e) {
-    e.preventDefault();
-
-    const email = document.getElementById('userEmail').value;
-    const btn = document.querySelector('.subscribe-submit');
-    
-    // Get list of SELECTED games
-    const selectedGames = [];
-    const checkboxes = document.querySelectorAll('#game-subscription-list input[type="checkbox"]:checked');
-    checkboxes.forEach(cb => selectedGames.push(cb.value));
-
-    if (selectedGames.length === 0) {
-        alert("Please select at least one game.");
-        return;
-    }
-
-    // Change button text to show loading
-    const originalText = btn.innerText;
-    btn.innerText = "Sending...";
-    btn.disabled = true;
-
-    // Send via EmailJS
-    const templateParams = {
-        user_email: email,
-        message: selectedGames.join(", ") // Creates a comma-separated list
-    };
-
-    // REPLACE THESE WITH YOUR IDs FROM EMAILJS DASHBOARD
-    const SERVICE_ID = "service_yfaukwg"; // e.g., "service_gmail"
-    const TEMPLATE_ID = "template_rmz7ocl";
-
-    emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
-        .then(function() {
-            alert('Success! You are subscribed.');
-            document.getElementById("notifyModal").style.display = "none";
-            btn.innerText = originalText;
-            btn.disabled = false;
-        }, function(error) {
-            console.error('FAILED...', error);
-            alert('Failed to subscribe. Please try again later.');
-            btn.innerText = originalText;
-            btn.disabled = false;
-        });
-};
-
-
-// ... Keep existing UpdateTimers, Promise.all, and other Listeners ...
-
-// UPDATED: Initialize sequence
 Promise.all([
   fetch(GAMES_URL).then(r => r.text()),
   fetch(SUBMISSIONS_URL).then(r => r.text()),
@@ -405,19 +300,6 @@ Promise.all([
   submissions = parseCSV(subsCSV);
 
   renderEvents();
-  renderSubscriptionList(); // <--- CALL THIS to populate the modal
+  renderSubscriptionList(); 
   setInterval(updateTimers, 1000);
 });
-
-// Modal Open/Close Logic
-const modal = document.getElementById("notifyModal");
-const openBtn = document.getElementById("openNotify");
-const closeBtn = document.querySelector(".close-modal");
-
-openBtn.onclick = () => {
-    modal.style.display = "flex";
-    // Refresh list just in case data changed
-    renderSubscriptionList();
-}
-closeBtn.onclick = () => modal.style.display = "none";
-window.onclick = (event) => { if (event == modal) modal.style.display = "none"; }
