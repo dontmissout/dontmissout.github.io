@@ -257,3 +257,44 @@ if (savedTheme) {
     currentThemeIndex = themes.indexOf(savedTheme);
     // Update icon to match
 }
+// --- Modal Logic ---
+const modal = document.getElementById("notifyModal");
+const openBtn = document.getElementById("openNotify");
+const closeBtn = document.querySelector(".close-modal");
+
+openBtn.onclick = () => modal.style.display = "flex";
+closeBtn.onclick = () => modal.style.display = "none";
+window.onclick = (event) => { if (event == modal) modal.style.display = "none"; }
+
+// --- Handle Subscription ---
+document.getElementById('subscribeForm').onsubmit = (e) => {
+    e.preventDefault();
+    const email = e.target.querySelector('input').value;
+    alert(`Success! We've added ${email} to our notification list.`);
+    modal.style.display = "none";
+    // NOTE: In a real app, you would fetch() an API here to save the email
+};
+
+// --- Updated Render Logic for "NEW" Badge ---
+// Inside your renderAccordionList function, where you create the event title:
+
+group.events.forEach((ev) => {
+    // Logic: If event was added in the last 24 hours
+    const createdDate = new Date(ev.timestamp); // Assumes you have a timestamp column
+    const isNew = (new Date() - createdDate) < (24 * 60 * 60 * 1000); 
+
+    const card = document.createElement("div");
+    card.className = "event-card";
+    card.innerHTML = `
+        <div class="event-top">
+            <span class="event-title">
+                ${ev.event_title}
+                ${isNew ? '<span class="badge-new">New</span>' : ''}
+            </span>
+            <span class="event-tag">${ev.type}</span>
+        </div>
+        <div class="countdown" data-date="${ev.end_datetime_utc}">Loading...</div>
+        <div class="submitter">By ${ev.submitted_by}</div>
+    `;
+    eventsDiv.appendChild(card);
+});
