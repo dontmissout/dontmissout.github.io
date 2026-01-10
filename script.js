@@ -217,3 +217,43 @@ document.getElementById("sortSelect").addEventListener("change", (e) => {
     renderEvents();
 });
 
+// Theme Controller
+const themeBtn = document.getElementById('themeToggle');
+const themeIcon = document.getElementById('themeIcon');
+const themes = ['dark', 'sunrise', 'light', 'sunset'];
+let currentThemeIndex = 0;
+
+themeBtn.addEventListener('click', () => {
+    // 1. Cycle Index
+    currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+    const newTheme = themes[currentThemeIndex];
+    
+    // 2. Trigger Icon Animation
+    themeIcon.parentElement.classList.remove('animate-icon');
+    void themeIcon.offsetWidth; // Trigger reflow to restart animation
+    themeIcon.parentElement.classList.add('animate-icon');
+
+    // 3. Update Body Attribute
+    setTimeout(() => {
+        document.body.setAttribute('data-theme', newTheme);
+        
+        // 4. Update Icon Appearance
+        if (newTheme === 'sunrise') {
+            themeIcon.className = 'fa-solid fa-mountain-sun'; // Sunrise icon
+        } else if (newTheme === 'light') {
+            themeIcon.className = 'fa-solid fa-sun'; // Full sun
+        } else if (newTheme === 'sunset') {
+            themeIcon.className = 'fa-solid fa-cloud-sun'; // Sunset icon
+        } else {
+            themeIcon.className = 'fa-solid fa-moon'; // Dark mode
+        }
+    }, 250); // Change half-way through the animation
+});
+
+// Optional: Load preferred theme from localStorage if you want it to save
+const savedTheme = localStorage.getItem('user-theme');
+if (savedTheme) {
+    document.body.setAttribute('data-theme', savedTheme);
+    currentThemeIndex = themes.indexOf(savedTheme);
+    // Update icon to match
+}
