@@ -429,3 +429,63 @@ body {
 }
 
 .disclaimer { font-size: 0.7rem; color: var(--text-muted); }
+
+/* ... Keep all previous variables and styles ... */
+
+/* Add these new styles for the modal list */
+
+.subscription-controls {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0 5px 0;
+}
+
+.text-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 0.8rem;
+    text-decoration: underline;
+}
+
+.game-checkbox-list {
+    max-height: 200px;
+    overflow-y: auto;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 15px;
+    text-align: left;
+    
+    /* Grid layout for 2 columns */
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+.checkbox-item input {
+    width: auto; /* Reset width from global input style */
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+}
+
+/* Custom Scrollbar for the list */
+.game-checkbox-list::-webkit-scrollbar {
+    width: 6px;
+}
+.game-checkbox-list::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border-radius: 4px;
+}
