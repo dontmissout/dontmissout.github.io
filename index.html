@@ -27,7 +27,7 @@
     </div>
 
     <div class="header-actions">
-      <button id="themeToggle" class="theme-btn">
+      <button id="themeToggle" class="theme-btn" title="Switch Theme">
         <div class="theme-icon-container"><i id="themeIcon" class="fa-solid fa-moon"></i></div>
       </button>
       <div class="version-control">
@@ -35,8 +35,9 @@
         <div class="tooltip-content">
           <h3>Changelog</h3>
           <ul>
-              <li><strong>v1.5:</strong> Fixed layout duplication</li>
-              <li><strong>v1.4:</strong> Email Subscription</li>
+              <li><strong>v1.5:</strong> Cleaned Code & Fixed Errors</li>
+              <li><strong>v1.4:</strong> Email Subscription Logic</li>
+              <li><strong>v1.3:</strong> Dynamic Themes</li>
           </ul>
           <div class="version-number">Ver: 1.5.0</div>
         </div>
@@ -86,10 +87,10 @@
 
     <section class="category-section collapsed" id="section-library">
       <div class="category-header">
-        <h2><i class="fa-solid fa-layer-group"></i> All Games / No Events</h2>
+        <h2><i class="fa-solid fa-layer-group" style="color: var(--text-muted);"></i> All Games / No Events</h2>
         <span class="category-arrow">▼</span>
       </div>
-      <div class="category-content" id="container-library"></div>
+      <div class="category-content" id="container-library" class="library-grid"></div>
     </section>
   </main>
 
@@ -97,6 +98,7 @@
     <div class="modal-content">
         <span class="close-modal">&times;</span>
         <h2>Stay in the Loop</h2>
+        <p>Select the games you want to track.</p>
         <form id="subscribeForm">
             <input type="email" id="userEmail" placeholder="Enter your email address" required>
             <div class="subscription-controls">
