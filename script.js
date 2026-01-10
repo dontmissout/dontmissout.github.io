@@ -298,3 +298,126 @@ group.events.forEach((ev) => {
     `;
     eventsDiv.appendChild(card);
 });
+
+// ... Keep your existing Constants and Variables ...
+const GAMES_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR76r__p7DDeh0CKE8pXB1Z1xDKXAkbtdauoyL4aYyeDrXQkbiOyojWIGl4WTxwcbdf4BaMtJ-FwPm9/pub?gid=623150298&single=true&output=csv";
+const SUBMISSIONS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR76r__p7DDeh0CKE8pXB1Z1xDKXAkbtdauoyL4aYyeDrXQkbiOyojWIGl4WTxwcbdf4BaMtJ-FwPm9/pub?gid=0&single=true&output=csv";
+
+let gamesMap = {};
+let submissions = [];
+let searchQuery = "";
+let sortBy = "soonest"; 
+
+// ... Keep parseCSV, renderEvents, addToGroup, etc ...
+// (I am omitting the middle parts to save space, keep your existing render logic)
+
+// 1. Logic to Populate Subscription List
+function renderSubscriptionList() {
+    const container = document.getElementById('game-subscription-list');
+    container.innerHTML = ''; // Clear it
+
+    // Get all games and sort alphabetically
+    const allGames = Object.values(gamesMap).sort((a, b) => a.display_name.localeCompare(b.display_name));
+
+    allGames.forEach(game => {
+        const label = document.createElement('label');
+        label.className = 'checkbox-item';
+        
+        // Create checkbox (Checked by default)
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.value = game.display_name;
+        input.checked = true; // Default to "Notify me about everything"
+
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(game.display_name));
+        container.appendChild(label);
+    });
+}
+
+// 2. Toggle Select/Deselect All
+const toggleBtn = document.getElementById('toggleAllGames');
+toggleBtn.addEventListener('click', () => {
+    const checkboxes = document.querySelectorAll('#game-subscription-list input[type="checkbox"]');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    
+    // If all are checked, uncheck all. Otherwise, check all.
+    checkboxes.forEach(cb => cb.checked = !allChecked);
+    toggleBtn.innerText = allChecked ? "Select All" : "Deselect All";
+});
+
+// 3. Handle Form Submission with EmailJS
+document.getElementById('subscribeForm').onsubmit = function(e) {
+    e.preventDefault();
+
+    const email = document.getElementById('userEmail').value;
+    const btn = document.querySelector('.subscribe-submit');
+    
+    // Get list of SELECTED games
+    const selectedGames = [];
+    const checkboxes = document.querySelectorAll('#game-subscription-list input[type="checkbox"]:checked');
+    checkboxes.forEach(cb => selectedGames.push(cb.value));
+
+    if (selectedGames.length === 0) {
+        alert("Please select at least one game.");
+        return;
+    }
+
+    // Change button text to show loading
+    const originalText = btn.innerText;
+    btn.innerText = "Sending...";
+    btn.disabled = true;
+
+    // Send via EmailJS
+    const templateParams = {
+        user_email: email,
+        message: selectedGames.join(", ") // Creates a comma-separated list
+    };
+
+    // REPLACE THESE WITH YOUR IDs FROM EMAILJS DASHBOARD
+    const SERVICE_ID = "service_yfaukwg"; // e.g., "service_gmail"
+    const TEMPLATE_ID = "template_rmz7ocl";
+
+    emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
+        .then(function() {
+            alert('Success! You are subscribed.');
+            document.getElementById("notifyModal").style.display = "none";
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }, function(error) {
+            console.error('FAILED...', error);
+            alert('Failed to subscribe. Please try again later.');
+            btn.innerText = originalText;
+            btn.disabled = false;
+        });
+};
+
+
+// ... Keep existing UpdateTimers, Promise.all, and other Listeners ...
+
+// UPDATED: Initialize sequence
+Promise.all([
+  fetch(GAMES_URL).then(r => r.text()),
+  fetch(SUBMISSIONS_URL).then(r => r.text()),
+]).then(([gamesCSV, subsCSV]) => {
+  const gamesList = parseCSV(gamesCSV);
+  gamesList.forEach(g => { gamesMap[g.game_key] = g; });
+  submissions = parseCSV(subsCSV);
+
+  renderEvents();
+  renderSubscriptionList(); // <--- CALL THIS to populate the modal
+  setInterval(updateTimers, 1000);
+});
+
+// Modal Open/Close Logic
+const modal = document.getElementById("notifyModal");
+const openBtn = document.getElementById("openNotify");
+const closeBtn = document.querySelector(".close-modal");
+
+openBtn.onclick = () => {
+    modal.style.display = "flex";
+    // Refresh list just in case data changed
+    renderSubscriptionList();
+}
+closeBtn.onclick = () => modal.style.display = "none";
+window.onclick = (event) => { if (event == modal) modal.style.display = "none"; }
