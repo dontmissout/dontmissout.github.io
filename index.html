@@ -5,25 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Game Event Tracker</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Event Tracker</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script type="text/javascript">
        (function(){
+          // Your Public Key
           emailjs.init("8cYhM41Kd5nP1f_2V");
        })();
     </script>
 </head>
-<body>
+<body data-theme="dark">
 
   <div class="bg-mesh"></div>
 
@@ -44,15 +36,17 @@
           <i id="themeIcon" class="fa-solid fa-moon"></i>
         </div>
       </button>
+
       <div class="version-control">
         <div class="help-icon">?</div>
         <div class="tooltip-content">
           <h3>Changelog</h3>
           <ul>
-              <li><strong>v1.4:</strong> Subscription Filter Added</li>
-              <li><strong>v1.3:</strong> Active & Library sections</li>
+              <li><strong>v1.5:</strong> Fixed layout duplication</li>
+              <li><strong>v1.4:</strong> Email Subscription & Filters</li>
+              <li><strong>v1.3:</strong> Dynamic Themes</li>
           </ul>
-          <div class="version-number">Ver: 1.4.0</div>
+          <div class="version-number">Ver: 1.5.0</div>
         </div>
       </div>
     </div>
@@ -60,7 +54,7 @@
 
   <section class="notification-banner">
       <div class="notify-content">
-          <div style="display:flex; align-items:center; gap:10px;">
+          <div class="notify-text">
               <i class="fa-solid fa-bell-ring"></i>
               <span>Get notified when new events drop!</span>
           </div>
@@ -101,7 +95,7 @@
 
     <section class="category-section collapsed" id="section-library">
       <div class="category-header">
-        <h2><i class="fa-solid fa-layer-group" style="color: #94a3b8;"></i> All Games / No Events</h2>
+        <h2><i class="fa-solid fa-layer-group" style="color: var(--text-muted);"></i> All Games / No Events</h2>
         <span class="category-arrow">▼</span>
       </div>
       <div class="category-content">
@@ -120,7 +114,7 @@
             <input type="email" id="userEmail" placeholder="Enter your email address" required>
             
             <div class="subscription-controls">
-                <span style="font-size:0.8rem; color:var(--text-muted);">Uncheck games to ignore them</span>
+                <span class="sub-hint">Uncheck games to ignore</span>
                 <button type="button" id="toggleAllGames" class="text-btn">Deselect All</button>
             </div>
 
@@ -136,110 +130,3 @@
   <script src="script.js"></script>
 </body>
 </html>
-<body>
-<section class="notification-banner">
-    <div class="notify-content">
-        <i class="fa-solid fa-bell-ring"></i>
-        <span>Never miss a drop. Get notified when new events are added!</span>
-        <button id="openNotify" class="notify-btn-small">Notify Me</button>
-    </div>
-</section>
-
-<div id="notifyModal" class="modal">
-    <div class="modal-content">
-        <span class="close-modal">&times;</span>
-        <h2>Stay in the Loop</h2>
-        <p>We'll send you a quick alert whenever a new event is added for your favorite games.</p>
-        <form id="subscribeForm">
-            <input type="email" placeholder="Enter your email" required>
-            <button type="submit" class="subscribe-submit">Subscribe</button>
-        </form>
-        <p class="disclaimer">No spam. Only game drops. Unsubscribe anytime.</p>
-    </div>
-</div>
-  <div class="bg-mesh"></div>
-
-  <header class="main-header">
-    <div class="logo-area">
-      <div class="logo-placeholder">
-        <i class="fa-solid fa-gamepad"></i>
-      </div>
-      <div class="title-group">
-        <h1>EventTracker</h1>
-        <p>Don't miss the drop</p>
-      </div>
-    </div>
-<div class="header-actions">
-  <button id="themeToggle" class="theme-btn" title="Switch Theme">
-    <div class="theme-icon-container">
-      <i id="themeIcon" class="fa-solid fa-sun"></i>
-    </div>
-  </button>
-
-  <div class="version-control">
-    <div class="help-icon">?</div>
-    </div>
-</div>
-    <div class="version-control">
-      <div class="help-icon">?</div>
-      <div class="tooltip-content">
-        <h3>Changelog</h3>
-        <ul>
-            <li><strong>v1.3:</strong> Added "Active" & "Library" sections</li>
-            <li><strong>v1.2:</strong> Mobile support & Sorting</li>
-            <li><strong>v1.0:</strong> Initial Release</li>
-        </ul>
-        <div class="version-number">Ver: 1.3.0</div>
-      </div>
-    </div>
-  </header>
-
-  <div class="controls-container">
-    <div class="search-wrapper">
-      <i class="fa-solid fa-magnifying-glass search-icon"></i>
-      <input type="text" id="searchInput" placeholder="Search games, events...">
-    </div>
-    
-    <div class="sort-wrapper">
-      <select id="sortSelect">
-        <option value="soonest">Sort: Ending Soonest</option>
-        <option value="alpha">Sort: Name (A-Z)</option>
-      </select>
-    </div>
-  </div>
-
-  <main>
-    <section class="category-section" id="section-urgent">
-      <div class="category-header">
-        <h2><i class="fa-solid fa-fire-flame-curved" style="color: #ef4444;"></i> Ending Soon (48h)</h2>
-        <span class="category-arrow">▼</span>
-      </div>
-      <div class="category-content" id="container-urgent"></div>
-    </section>
-
-    <section class="category-section" id="section-active">
-      <div class="category-header">
-        <h2><i class="fa-solid fa-bolt" style="color: #fbbf24;"></i> Active Events</h2>
-        <span class="category-arrow">▼</span>
-      </div>
-      <div class="category-content" id="container-active"></div>
-    </section>
-
-    <section class="category-section collapsed" id="section-library">
-      <div class="category-header">
-        <h2><i class="fa-solid fa-layer-group" style="color: #94a3b8;"></i> All Games / No Events</h2>
-        <span class="category-arrow">▼</span>
-      </div>
-      <div class="category-content">
-        <div id="container-library" class="library-grid"></div>
-      </div>
-    </section>
-  </main>
-
-  <script src="script.js"></script>
-</body>
-</html>
-
-
-
-
