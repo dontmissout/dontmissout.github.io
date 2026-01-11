@@ -1,4 +1,4 @@
-// --- Constants & Config ---
+// --- Configuration ---
 const GAMES_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR76r__p7DDeh0CKE8pXB1Z1xDKXAkbtdauoyL4aYyeDrXQkbiOyojWIGl4WTxwcbdf4BaMtJ-FwPm9/pub?gid=623150298&single=true&output=csv";
 const SUBMISSIONS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR76r__p7DDeh0CKE8pXB1Z1xDKXAkbtdauoyL4aYyeDrXQkbiOyojWIGl4WTxwcbdf4BaMtJ-FwPm9/pub?gid=0&single=true&output=csv";
 const SERVICE_ID = "service_yfaukwg";
@@ -9,7 +9,7 @@ let submissions = [];
 let searchQuery = "";
 let sortBy = "soonest";
 
-// --- Data Fetching ---
+// --- Utilities ---
 function parseCSV(text) {
     const lines = text.trim().split("\n");
     const headers = lines.shift().split(",").map(h => h.trim());
@@ -21,6 +21,7 @@ function parseCSV(text) {
     });
 }
 
+// --- Rendering Logic ---
 function renderEvents() {
     const urgentBox = document.getElementById("container-urgent");
     const activeBox = document.getElementById("container-active");
@@ -49,13 +50,13 @@ function renderEvents() {
         targetGroup[e.game_key].events.push(e);
     });
 
-    // Populate UI
     buildAccordion(urgentGroups, urgentBox);
     buildAccordion(activeGroups, activeBox);
     
-    // Library
+    // Library Grid
     Object.values(gamesMap).forEach(g => {
         if (!gamesWithEvents.has(g.game_key)) {
+            if (searchQuery && !g.display_name.toLowerCase().includes(searchQuery)) return;
             const card = document.createElement("div");
             card.className = "library-card";
             card.innerHTML = `<img src="${g.cover_image}"><h4>${g.display_name}</h4>`;
@@ -93,18 +94,19 @@ function updateTimers() {
     document.querySelectorAll(".countdown").forEach(el => {
         const diff = new Date(el.dataset.date) - now;
         if (diff <= 0) { el.innerText = "Ended"; return; }
-        const h = Math.floor(diff / 3600000);
+        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
         const m = Math.floor((diff % 3600000) / 60000);
         const s = Math.floor((diff % 60000) / 1000);
-        el.innerText = `${h}h ${m}m ${s}s`;
+        el.innerText = `${d > 0 ? d + 'd ' : ''}${h}h ${m}m ${s}s`;
     });
 }
 
-// --- Subscription Modal ---
+// --- UI Actions ---
 function renderSubList() {
     const box = document.getElementById("game-subscription-list");
     box.innerHTML = "";
-    Object.values(gamesMap).forEach(g => {
+    Object.values(gamesMap).sort((a,b) => a.display_name.localeCompare(b.display_name)).forEach(g => {
         const item = document.createElement("label");
         item.className = "checkbox-item";
         item.innerHTML = `<input type="checkbox" value="${g.display_name}" checked> ${g.display_name}`;
@@ -112,11 +114,20 @@ function renderSubList() {
     });
 }
 
+document.getElementById("toggleAllGames").onclick = () => {
+    const cbs = document.querySelectorAll("#game-subscription-list input");
+    const allOn = Array.from(cbs).every(c => c.checked);
+    cbs.forEach(c => c.checked = !allOn);
+    document.getElementById("toggleAllGames").innerText = allOn ? "Select All" : "Deselect All";
+};
+
 document.getElementById("subscribeForm").onsubmit = (e) => {
     e.preventDefault();
-    const btn = e.target.querySelector("button");
+    const btn = e.target.querySelector(".subscribe-submit");
     const selected = Array.from(document.querySelectorAll("#game-subscription-list input:checked")).map(i => i.value);
     
+    if(selected.length === 0) { alert("Please select at least one game!"); return; }
+
     btn.innerText = "Sending...";
     emailjs.send(SERVICE_ID, TEMPLATE_ID, {
         user_email: document.getElementById("userEmail").value,
@@ -128,16 +139,20 @@ document.getElementById("subscribeForm").onsubmit = (e) => {
     });
 };
 
-// --- Themes & UI Init ---
-const themeBtn = document.getElementById('themeToggle');
-const themes = ['dark', 'sunrise', 'light', 'sunset'];
-let tIdx = 0;
+document.getElementById("themeToggle").onclick = () => {
+    const themes = ['dark', 'sunrise', 'light', 'sunset'];
+    let current = document.body.getAttribute('data-theme');
+    let next = themes[(themes.indexOf(current) + 1) % themes.length];
+    
+    document.body.setAttribute('data-theme', next);
+    const icon = document.getElementById("themeIcon");
+    icon.parentElement.classList.add('animate-icon');
+    setTimeout(() => icon.parentElement.classList.remove('animate-icon'), 500);
 
-themeBtn.onclick = () => {
-    tIdx = (tIdx + 1) % themes.length;
-    const t = themes[tIdx];
-    document.body.setAttribute('data-theme', t);
-    document.getElementById("themeIcon").className = `fa-solid fa-${t === 'dark' ? 'moon' : t === 'light' ? 'sun' : 'mountain-sun'}`;
+    if (next === 'sunrise') icon.className = 'fa-solid fa-mountain-sun';
+    else if (next === 'light') icon.className = 'fa-solid fa-sun';
+    else if (next === 'sunset') icon.className = 'fa-solid fa-cloud-sun';
+    else icon.className = 'fa-solid fa-moon';
 };
 
 document.getElementById("openNotify").onclick = () => {
@@ -156,7 +171,7 @@ document.querySelectorAll(".category-header").forEach(h => {
     h.onclick = () => h.parentElement.classList.toggle("collapsed");
 });
 
-// Start
+// --- Initialization ---
 Promise.all([
     fetch(GAMES_URL).then(r => r.text()),
     fetch(SUBMISSIONS_URL).then(r => r.text())
