@@ -1,4 +1,4 @@
-/* --- Global Reset (Fixes sizing issues) --- */
+/* --- Global Reset --- */
 * { box-sizing: border-box; }
 
 :root {
@@ -13,11 +13,70 @@
 body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: var(--text-main); margin: 0; padding: 20px; transition: all 0.5s ease; overflow-x: hidden; }
 .bg-mesh { position: fixed; top:0; left:0; width:100%; height:100%; z-index:-1; background: radial-gradient(circle at 15% 50%, var(--accent-glow), transparent 25%); }
 
-.main-header { display: flex; justify-content: space-between; align-items: center; max-width: 900px; margin: 0 auto 20px; }
+/* --- Header & Layout --- */
+.main-header { display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto 20px; }
 .logo-area { display: flex; align-items: center; gap: 12px; }
 .logo-placeholder { width: 40px; height: 40px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; }
 .header-right { display: flex; align-items: center; gap: 15px; }
 
+/* --- 3-Column Layout Grid (Desktop) --- */
+.layout-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    /* Default: just the main content */
+    display: block;
+}
+
+main { 
+    width: 100%; 
+    max-width: 900px; 
+    margin: 0 auto; 
+}
+
+/* Sidebar Styles (Hidden by default/mobile) */
+.sidebar { display: none; }
+
+/* Desktop View (Show Sidebars) */
+@media (min-width: 1200px) {
+    .layout-container {
+        display: grid;
+        grid-template-columns: 220px 1fr 220px; /* Left Sidebar | Content | Right Sidebar */
+        gap: 20px;
+        align-items: start;
+    }
+    
+    .sidebar {
+        display: block;
+        position: sticky;
+        top: 20px;
+    }
+
+    main { max-width: 100%; } /* Let grid handle width */
+}
+
+/* --- Ad Block Styling --- */
+.ad-block {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+.ad-block h4 { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 10px; margin-top: 0; }
+.ad-placeholder {
+    padding: 20px 10px;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    color: var(--text-muted);
+}
+.ad-placeholder i { font-size: 2rem; margin-bottom: 10px; display: block; color: var(--accent); }
+.ad-btn {
+    background: var(--accent); color: white; border: none; padding: 6px 12px; 
+    border-radius: 6px; font-size: 0.8rem; cursor: pointer; margin-top: 10px; width: 100%;
+}
+
+/* --- Standard Components --- */
 .theme-btn { background: var(--card-bg); border: 1px solid var(--border); color: var(--accent); width: 38px; height: 38px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .version-control { position: relative; cursor: pointer; }
 .help-icon { width: 28px; height: 28px; border-radius: 50%; background: var(--card-bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
@@ -28,18 +87,14 @@ body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color
 .notify-content { display: flex; justify-content: space-between; align-items: center; }
 .notify-btn-small { background: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
-/* --- Fixed Search Bar & Controls --- */
 .controls-container { max-width: 900px; margin: 0 auto 30px; display: flex; gap: 15px; align-items: center; }
-.search-wrapper { flex: 1; position: relative; } /* Grows to fill space */
+.search-wrapper { flex: 1; position: relative; }
 .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: 0.5; color: var(--text-muted); }
-
-/* Ensure input fits inside wrapper */
 input#searchInput { width: 100%; padding: 12px 12px 12px 40px; background: var(--card-bg); border: 1px solid var(--border); color: var(--text-main); border-radius: 10px; font-size: 0.95rem; }
-
-.sort-wrapper { width: auto; flex-shrink: 0; } /* Prevents sort dropdown from shrinking */
+.sort-wrapper { width: auto; flex-shrink: 0; }
 select { padding: 12px; background: var(--card-bg); border: 1px solid var(--border); color: var(--text-main); border-radius: 10px; cursor: pointer; }
 
-main { max-width: 900px; margin: 0 auto; }
+/* Game Sections */
 .category-section { margin-bottom: 20px; border: 1px solid var(--border); border-radius: 16px; background: rgba(255,255,255,0.02); overflow: hidden; }
 .category-header { padding: 18px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
 .category-content { max-height: 2000px; transition: max-height 0.4s ease; }
@@ -56,36 +111,50 @@ main { max-width: 900px; margin: 0 auto; }
 .event-card:last-child { border-bottom: none; }
 .countdown { color: var(--accent); font-weight: bold; margin-top: 5px; font-family: monospace; font-size: 1rem; }
 
-/* --- Library Grid (Fixed Hover & Layout) --- */
+/* Library Grid & Hover Effects */
 .library-grid { 
     display: grid; 
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); 
     gap: 15px; 
     padding: 20px; 
 }
-
 .library-card { 
     background: var(--card-bg); 
     padding: 20px; 
     border-radius: 12px; 
     border: 1px solid var(--border); 
     text-align: center; 
-    transition: all 0.3s ease; /* Smoother transition */
+    transition: all 0.3s ease;
     cursor: pointer;
     position: relative;
-    top: 0;
+    overflow: hidden; /* Important for overlay */
 }
-
-/* Stronger Hover Effect */
 .library-card:hover { 
     transform: translateY(-5px); 
     border-color: var(--accent); 
-    background: rgba(255,255,255,0.1);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
-
 .library-card img { width: 60px; height: 60px; border-radius: 8px; margin-bottom: 10px; object-fit: cover; }
-.library-card h4 { font-size: 0.9rem; color: var(--text-muted); margin: 0; }
+.library-card h4 { font-size: 0.9rem; color: var(--text-muted); margin: 0; position: relative; z-index: 1; }
+
+/* The Hover Overlay (Email Us) */
+.library-overlay {
+    position: absolute; 
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--bg-dark); 
+    opacity: 0; 
+    transition: opacity 0.2s;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; 
+    padding: 15px;
+    z-index: 10;
+}
+.library-card:hover .library-overlay { opacity: 0.96; }
+.library-overlay p { margin: 0 0 10px 0; font-size: 0.85rem; color: var(--text-main); }
+.email-link {
+    font-size: 0.8rem; color: var(--accent); text-decoration: none; font-weight: bold;
+    border: 1px solid var(--accent); padding: 6px 12px; border-radius: 20px;
+}
+.email-link:hover { background: var(--accent); color: white; }
 
 /* Modal */
 .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
