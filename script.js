@@ -182,6 +182,24 @@ document.querySelectorAll(".category-header").forEach(h => {
     h.onclick = () => h.parentElement.classList.toggle("collapsed");
 });
 
+// --- [Add this to your UI Actions section in script.js] ---
+
+document.getElementById("openPrivacy").onclick = (e) => {
+    e.preventDefault();
+    document.getElementById("privacyModal").style.display = "flex";
+};
+
+document.getElementById("closePrivacy").onclick = () => {
+    document.getElementById("privacyModal").style.display = "none";
+};
+
+// Also update the window click listener to handle both modals
+window.onclick = function(event) {
+    const notifyModal = document.getElementById("notifyModal");
+    const privacyModal = document.getElementById("privacyModal");
+    if (event.target == notifyModal) notifyModal.style.display = "none";
+    if (event.target == privacyModal) privacyModal.style.display = "none";
+};
 // --- Initialization ---
 Promise.all([
     fetch(GAMES_URL).then(r => r.text()),
@@ -195,3 +213,4 @@ Promise.all([
 
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2013789685278981"
      crossorigin="anonymous"></script>
+
