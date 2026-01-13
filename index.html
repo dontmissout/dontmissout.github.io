@@ -7,8 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2013789685278981"
-     crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2013789685278981" crossorigin="anonymous"></script>
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script type="text/javascript">
@@ -38,12 +37,12 @@
         <div class="tooltip-content">
           <h3>Changelog</h3>
           <ul>
-              <li><strong>v1.8:</strong> AdSense & Privacy Setup</li>
-              <li><strong>v1.7:</strong> Sidebars & Hover Fixes</li>
+              <li><strong>v1.9:</strong> Fixed JS Freeze & Sidebar</li>
+              <li><strong>v1.8:</strong> AdSense & Privacy</li>
           </ul>
           <hr style="border:0; border-top:1px solid var(--border); margin: 10px 0;">
           <a href="#" id="openPrivacy" style="color:var(--accent); font-size: 0.75rem; text-decoration: none;">Privacy Policy</a>
-          <div class="version-number">Ver: 1.8.0</div>
+          <div class="version-number">Ver: 1.9.0</div>
         </div>
       </div>
     </div>
@@ -76,12 +75,11 @@
     <aside class="sidebar left-sidebar">
         <div class="ad-card">
             <div class="ad-tag">SPONSORED</div>
-            <div class="ad-content">
-                <div class="amazon-placeholder">
-                    <img src="https://m.media-amazon.com/images/I/61mpMH5TCtL._AC_SL1500_.jpg" alt="Gaming Mouse">
-                    <p class="ad-title">Logitech G Pro Wireless</p>
-                    <p class="ad-price">$89.99</p>
-                    <a href="#" class="amazon-btn">View on Amazon</a>
+            <div class="ad-content" id="left-ad-slot">
+                <div class="ad-placeholder-clean">
+                    <i class="fa-solid fa-rectangle-ad"></i>
+                    <p>Featured Deal</p>
+                    <button class="ad-btn-minimal">Learn More</button>
                 </div>
             </div>
         </div>
@@ -118,11 +116,11 @@
     <aside class="sidebar right-sidebar">
         <div class="ad-card">
             <div class="ad-tag">RECOMMENDED</div>
-            <div class="ad-content">
-                <div class="amazon-placeholder">
-                    <i class="fa-solid fa-vr-cardboard" style="font-size: 3rem; color: var(--accent); margin-bottom: 10px;"></i>
-                    <p class="ad-title">Quest 3 VR Headset</p>
-                    <a href="#" class="amazon-btn">Shop Deals</a>
+            <div class="ad-content" id="right-ad-slot">
+                <div class="ad-placeholder-clean">
+                    <i class="fa-solid fa-tags"></i>
+                    <p>Gaming Sales</p>
+                    <button class="ad-btn-minimal">View Now</button>
                 </div>
             </div>
         </div>
@@ -152,9 +150,9 @@
         <h2>Privacy Policy</h2>
         <div style="font-size: 0.85rem; max-height: 400px; overflow-y: auto; color: var(--text-muted);">
             <p><strong>1. Introduction</strong><br>We value your privacy. This policy explains how we handle data when you use our Event Tracker.</p>
-            <p><strong>2. Information We Collect</strong><br>When you sign up for email notifications, we collect your email address and game preferences solely to send you event updates.</p>
-            <p><strong>3. Cookies & Advertising</strong><br>We use Google AdSense to serve ads. Google uses cookies (DART cookies) to serve ads based on your visit to this site and other sites on the Internet. You may opt out of the use of the DART cookie by visiting the Google Ad and Content Network privacy policy.</p>
-            <p><strong>4. Third-Party Links</strong><br>Our site contains affiliate links (Amazon). Clicking these links may earn us a commission at no extra cost to you.</p>
+            <p><strong>2. Information We Collect</strong><br>When you sign up for email notifications, we collect your email address and game preferences solely to send you updates.</p>
+            <p><strong>3. Cookies & Advertising</strong><br>We use Google AdSense to serve ads. Google uses cookies to serve ads based on your visit. You may opt out via Google Ad settings.</p>
+            <p><strong>4. Third-Party Links</strong><br>Our site contains affiliate and sponsored links. Clicking these may earn us a commission.</p>
         </div>
     </div>
   </div>
