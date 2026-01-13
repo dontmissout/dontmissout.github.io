@@ -167,3 +167,73 @@ select { padding: 12px; background: var(--card-bg); border: 1px solid var(--bord
 .text-btn { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 0.75rem; text-decoration: underline; }
 .sub-hint { font-size: 0.75rem; color: var(--text-muted); }
 .subscribe-submit { width: 100%; background: var(--accent); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+
+/* --- High-End Ad Styling --- */
+.ad-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 20px;
+    position: relative;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+    overflow: hidden;
+}
+
+.ad-card:hover {
+    transform: scale(1.02);
+    border-color: var(--accent);
+}
+
+.ad-tag {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    text-align: left;
+    opacity: 0.6;
+}
+
+.amazon-placeholder {
+    text-align: center;
+}
+
+.amazon-placeholder img {
+    width: 100%;
+    max-width: 140px;
+    height: auto;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+}
+
+.ad-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 5px 0;
+    color: var(--text-main);
+}
+
+.ad-price {
+    color: #4ade80; /* Green for price */
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+.amazon-btn {
+    display: block;
+    background: #f39c12; /* Amazon Orange */
+    color: #111 !important;
+    text-decoration: none;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.amazon-btn:hover {
+    background: #e67e22;
+}
