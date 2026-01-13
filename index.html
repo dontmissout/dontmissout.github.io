@@ -35,11 +35,11 @@
         <div class="tooltip-content">
           <h3>Changelog</h3>
           <ul>
+              <li><strong>v1.7:</strong> Added Sidebars & Fixed Hover</li>
               <li><strong>v1.6:</strong> Fixed Layout & Grid</li>
               <li><strong>v1.5:</strong> Cleaned Code</li>
-              <li><strong>v1.4:</strong> Email Subscription</li>
           </ul>
-          <div class="version-number">Ver: 1.6.0</div>
+          <div class="version-number">Ver: 1.7.0</div>
         </div>
       </div>
     </div>
@@ -68,33 +68,73 @@
     </div>
   </div>
 
-  <main>
-    <section class="category-section" id="section-urgent">
-      <div class="category-header">
-        <h2><i class="fa-solid fa-fire-flame-curved" style="color: #ef4444;"></i> Ending Soon (48h)</h2>
-        <span class="category-arrow">▼</span>
-      </div>
-      <div class="category-content" id="container-urgent"></div>
-    </section>
+  <div class="layout-container">
+    
+    <aside class="sidebar left-sidebar">
+        <div class="ad-block">
+            <h4>Recommended Gear</h4>
+            <div class="ad-placeholder">
+                <i class="fa-brands fa-amazon"></i>
+                <p>Gaming Mouse Deals</p>
+                <button class="ad-btn">View on Amazon</button>
+            </div>
+        </div>
+        <div class="ad-block">
+            <div class="ad-placeholder">
+                <i class="fa-solid fa-headset"></i>
+                <p>Top Headsets 2024</p>
+                <button class="ad-btn">View on Amazon</button>
+            </div>
+        </div>
+    </aside>
 
-    <section class="category-section" id="section-active">
-      <div class="category-header">
-        <h2><i class="fa-solid fa-bolt" style="color: #fbbf24;"></i> Active Events</h2>
-        <span class="category-arrow">▼</span>
-      </div>
-      <div class="category-content" id="container-active"></div>
-    </section>
+    <main>
+        <section class="category-section" id="section-urgent">
+        <div class="category-header">
+            <h2><i class="fa-solid fa-fire-flame-curved" style="color: #ef4444;"></i> Ending Soon (48h)</h2>
+            <span class="category-arrow">▼</span>
+        </div>
+        <div class="category-content" id="container-urgent"></div>
+        </section>
 
-    <section class="category-section collapsed" id="section-library">
-      <div class="category-header">
-        <h2><i class="fa-solid fa-layer-group" style="color: var(--text-muted);"></i> All Games / No Events</h2>
-        <span class="category-arrow">▼</span>
-      </div>
-      <div class="category-content">
-         <div id="container-library" class="library-grid"></div>
-      </div>
-    </section>
-  </main>
+        <section class="category-section" id="section-active">
+        <div class="category-header">
+            <h2><i class="fa-solid fa-bolt" style="color: #fbbf24;"></i> Active Events</h2>
+            <span class="category-arrow">▼</span>
+        </div>
+        <div class="category-content" id="container-active"></div>
+        </section>
+
+        <section class="category-section collapsed" id="section-library">
+        <div class="category-header">
+            <h2><i class="fa-solid fa-layer-group" style="color: var(--text-muted);"></i> All Games / No Events</h2>
+            <span class="category-arrow">▼</span>
+        </div>
+        <div class="category-content">
+            <div id="container-library" class="library-grid"></div>
+        </div>
+        </section>
+    </main>
+
+    <aside class="sidebar right-sidebar">
+        <div class="ad-block">
+            <h4>Daily Drops</h4>
+            <div class="ad-placeholder">
+                <i class="fa-solid fa-gamepad"></i>
+                <p>Pro Controllers</p>
+                <button class="ad-btn">Check Price</button>
+            </div>
+        </div>
+        <div class="ad-block">
+             <div class="ad-placeholder">
+                <i class="fa-solid fa-keyboard"></i>
+                <p>Mechanical Keyboards</p>
+                <button class="ad-btn">Check Price</button>
+            </div>
+        </div>
+    </aside>
+
+  </div>
 
   <div id="notifyModal" class="modal">
     <div class="modal-content">
