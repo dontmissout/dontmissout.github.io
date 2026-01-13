@@ -53,13 +53,24 @@ function renderEvents() {
     buildAccordion(urgentGroups, urgentBox);
     buildAccordion(activeGroups, activeBox);
     
-    // Library Grid
+    // Library Grid Logic
     Object.values(gamesMap).forEach(g => {
         if (!gamesWithEvents.has(g.game_key)) {
             if (searchQuery && !g.display_name.toLowerCase().includes(searchQuery)) return;
+            
             const card = document.createElement("div");
-            card.className = "library-card";
-            card.innerHTML = `<img src="${g.cover_image}"><h4>${g.display_name}</h4>`;
+            card.className = "library-card"; 
+            
+            // IMPORTANT: This innerHTML includes the Overlay div!
+            card.innerHTML = `
+                <img src="${g.cover_image}">
+                <h4>${g.display_name}</h4>
+                <div class="library-overlay">
+                    <p>No active events.</p>
+                    <a href="mailto:dontmissoutdev@gmail.com?subject=Event Report for ${g.display_name}" class="email-link">Tell us!</a>
+                </div>
+            `;
+            
             libraryBox.appendChild(card);
         }
     });
