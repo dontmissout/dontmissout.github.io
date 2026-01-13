@@ -7,9 +7,7 @@ const TEMPLATE_ID = "template_rmz7ocl";
 let gamesMap = {};
 let submissions = [];
 let searchQuery = "";
-let sortBy = "soonest";
 
-// --- Utilities ---
 function parseCSV(text) {
     const lines = text.trim().split("\n");
     const headers = lines.shift().split(",").map(h => h.trim());
@@ -21,31 +19,24 @@ function parseCSV(text) {
     });
 }
 
-// --- Rendering Logic ---
 function renderEvents() {
     const urgentBox = document.getElementById("container-urgent");
     const activeBox = document.getElementById("container-active");
     const libraryBox = document.getElementById("container-library");
     
     urgentBox.innerHTML = ""; activeBox.innerHTML = ""; libraryBox.innerHTML = "";
-
-    const activeGroups = {};
-    const urgentGroups = {};
-    const gamesWithEvents = new Set();
-    const now = new Date();
+    const activeGroups = {}, urgentGroups = {}, gamesWithEvents = new Set(), now = new Date();
 
     submissions.forEach(e => {
         if (e.approved !== "TRUE" || !gamesMap[e.game_key]) return;
         const endDate = new Date(e.end_datetime_utc);
         if (isNaN(endDate) || now > endDate) return;
-
         const searchText = `${gamesMap[e.game_key].display_name} ${e.event_title}`.toLowerCase();
         if (searchQuery && !searchText.includes(searchQuery)) return;
 
         gamesWithEvents.add(e.game_key);
         const diff = endDate - now;
         const targetGroup = diff < (48 * 60 * 60 * 1000) ? urgentGroups : activeGroups;
-        
         if (!targetGroup[e.game_key]) targetGroup[e.game_key] = { meta: gamesMap[e.game_key], events: [] };
         targetGroup[e.game_key].events.push(e);
     });
@@ -53,28 +44,21 @@ function renderEvents() {
     buildAccordion(urgentGroups, urgentBox);
     buildAccordion(activeGroups, activeBox);
     
-    // Library Grid Logic
     Object.values(gamesMap).forEach(g => {
         if (!gamesWithEvents.has(g.game_key)) {
             if (searchQuery && !g.display_name.toLowerCase().includes(searchQuery)) return;
-            
             const card = document.createElement("div");
             card.className = "library-card"; 
-            
-            // IMPORTANT: This innerHTML includes the Overlay div!
             card.innerHTML = `
-                <img src="${g.cover_image}">
+                <img src="${g.cover_image}" onerror="this.src='https://via.placeholder.com/60?text=Game'">
                 <h4>${g.display_name}</h4>
                 <div class="library-overlay">
-                    <p>No active events.</p>
-                    <a href="mailto:dontmissoutdev@gmail.com?subject=Event Report for ${g.display_name}" class="email-link">Tell us!</a>
-                </div>
-            `;
-            
+                    <p style="font-size:0.8rem; margin-bottom:8px;">No active events.</p>
+                    <a href="mailto:dontmissoutdev@gmail.com?subject=Event Report: ${g.display_name}" class="email-link">Email Us!</a>
+                </div>`;
             libraryBox.appendChild(card);
         }
     });
-    updateTimers();
 }
 
 function buildAccordion(data, container) {
@@ -82,17 +66,13 @@ function buildAccordion(data, container) {
         const section = document.createElement("div");
         section.className = "game-section";
         section.innerHTML = `
-            <div class="game-header">
-                <img src="${group.meta.cover_image}">
-                <span>${group.meta.display_name}</span>
-            </div>
-            <div class="events-container"></div>
-        `;
+            <div class="game-header"><img src="${group.meta.cover_image}" onerror="this.src='https://via.placeholder.com/40'"><span>${group.meta.display_name}</span></div>
+            <div class="events-container"></div>`;
         const eventBox = section.querySelector(".events-container");
         group.events.forEach(ev => {
             const el = document.createElement("div");
             el.className = "event-card";
-            el.innerHTML = `<strong>${ev.event_title}</strong><div class="countdown" data-date="${ev.end_datetime_utc}"></div>`;
+            el.innerHTML = `<div style="padding:10px 15px;"><strong>${ev.event_title}</strong><div class="countdown" data-date="${ev.end_datetime_utc}" style="color:var(--accent); font-family:monospace; margin-top:5px;"></div></div>`;
             eventBox.appendChild(el);
         });
         section.querySelector(".game-header").onclick = () => section.classList.toggle("open");
@@ -105,102 +85,43 @@ function updateTimers() {
     document.querySelectorAll(".countdown").forEach(el => {
         const diff = new Date(el.dataset.date) - now;
         if (diff <= 0) { el.innerText = "Ended"; return; }
-        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-        const m = Math.floor((diff % 3600000) / 60000);
-        const s = Math.floor((diff % 60000) / 1000);
+        const d = Math.floor(diff / 86400000), h = Math.floor((diff / 3600000) % 24), m = Math.floor((diff / 60000) % 60), s = Math.floor((diff / 1000) % 60);
         el.innerText = `${d > 0 ? d + 'd ' : ''}${h}h ${m}m ${s}s`;
     });
 }
 
-// --- UI Actions ---
-function renderSubList() {
-    const box = document.getElementById("game-subscription-list");
-    box.innerHTML = "";
-    Object.values(gamesMap).sort((a,b) => a.display_name.localeCompare(b.display_name)).forEach(g => {
-        const item = document.createElement("label");
-        item.className = "checkbox-item";
-        item.innerHTML = `<input type="checkbox" value="${g.display_name}" checked> ${g.display_name}`;
-        box.appendChild(item);
-    });
-}
+// UI Actions
+document.getElementById("openPrivacy").onclick = (e) => { e.preventDefault(); document.getElementById("privacyModal").style.display = "flex"; };
+document.getElementById("closePrivacy").onclick = () => { document.getElementById("privacyModal").style.display = "none"; };
+document.getElementById("openNotify").onclick = () => { document.getElementById("notifyModal").style.display = "flex"; };
+document.querySelectorAll(".close-modal").forEach(btn => btn.onclick = () => { 
+    document.getElementById("notifyModal").style.display = "none"; 
+    document.getElementById("privacyModal").style.display = "none"; 
+});
 
-document.getElementById("toggleAllGames").onclick = () => {
-    const cbs = document.querySelectorAll("#game-subscription-list input");
-    const allOn = Array.from(cbs).every(c => c.checked);
-    cbs.forEach(c => c.checked = !allOn);
-    document.getElementById("toggleAllGames").innerText = allOn ? "Select All" : "Deselect All";
+window.onclick = (e) => {
+    if (e.target.classList.contains('modal')) e.target.style.display = "none";
 };
 
-document.getElementById("subscribeForm").onsubmit = (e) => {
-    e.preventDefault();
-    const btn = e.target.querySelector(".subscribe-submit");
-    const selected = Array.from(document.querySelectorAll("#game-subscription-list input:checked")).map(i => i.value);
-    
-    if(selected.length === 0) { alert("Please select at least one game!"); return; }
+document.getElementById("searchInput").oninput = (e) => { searchQuery = e.target.value.toLowerCase(); renderEvents(); };
 
-    btn.innerText = "Sending...";
-    emailjs.send(SERVICE_ID, TEMPLATE_ID, {
-        user_email: document.getElementById("userEmail").value,
-        message: selected.join(", ")
-    }).then(() => {
-        alert("Subscribed!");
-        document.getElementById("notifyModal").style.display = "none";
-        btn.innerText = "Subscribe";
-    });
-};
+document.querySelectorAll(".category-header").forEach(h => {
+    h.onclick = () => h.parentElement.classList.toggle("collapsed");
+});
 
 document.getElementById("themeToggle").onclick = () => {
     const themes = ['dark', 'sunrise', 'light', 'sunset'];
     let current = document.body.getAttribute('data-theme');
     let next = themes[(themes.indexOf(current) + 1) % themes.length];
-    
     document.body.setAttribute('data-theme', next);
     const icon = document.getElementById("themeIcon");
-    icon.parentElement.classList.add('animate-icon');
-    setTimeout(() => icon.parentElement.classList.remove('animate-icon'), 500);
-
     if (next === 'sunrise') icon.className = 'fa-solid fa-mountain-sun';
     else if (next === 'light') icon.className = 'fa-solid fa-sun';
     else if (next === 'sunset') icon.className = 'fa-solid fa-cloud-sun';
     else icon.className = 'fa-solid fa-moon';
 };
 
-document.getElementById("openNotify").onclick = () => {
-    document.getElementById("notifyModal").style.display = "flex";
-    renderSubList();
-};
-
-document.querySelector(".close-modal").onclick = () => document.getElementById("notifyModal").style.display = "none";
-
-document.getElementById("searchInput").oninput = (e) => {
-    searchQuery = e.target.value.toLowerCase();
-    renderEvents();
-};
-
-document.querySelectorAll(".category-header").forEach(h => {
-    h.onclick = () => h.parentElement.classList.toggle("collapsed");
-});
-
-// --- [Add this to your UI Actions section in script.js] ---
-
-document.getElementById("openPrivacy").onclick = (e) => {
-    e.preventDefault();
-    document.getElementById("privacyModal").style.display = "flex";
-};
-
-document.getElementById("closePrivacy").onclick = () => {
-    document.getElementById("privacyModal").style.display = "none";
-};
-
-// Also update the window click listener to handle both modals
-window.onclick = function(event) {
-    const notifyModal = document.getElementById("notifyModal");
-    const privacyModal = document.getElementById("privacyModal");
-    if (event.target == notifyModal) notifyModal.style.display = "none";
-    if (event.target == privacyModal) privacyModal.style.display = "none";
-};
-// --- Initialization ---
+// Initialization
 Promise.all([
     fetch(GAMES_URL).then(r => r.text()),
     fetch(SUBMISSIONS_URL).then(r => r.text())
@@ -210,7 +131,3 @@ Promise.all([
     renderEvents();
     setInterval(updateTimers, 1000);
 });
-
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2013789685278981"
-     crossorigin="anonymous"></script>
-
