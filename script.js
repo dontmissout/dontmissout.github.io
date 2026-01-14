@@ -1,8 +1,6 @@
 // --- Configuration ---
 const GAMES_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR76r__p7DDeh0CKE8pXB1Z1xDKXAkbtdauoyL4aYyeDrXQkbiOyojWIGl4WTxwcbdf4BaMtJ-FwPm9/pub?gid=623150298&single=true&output=csv";
 const SUBMISSIONS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR76r__p7DDeh0CKE8pXB1Z1xDKXAkbtdauoyL4aYyeDrXQkbiOyojWIGl4WTxwcbdf4BaMtJ-FwPm9/pub?gid=0&single=true&output=csv";
-const SERVICE_ID = "service_yfaukwg";
-const TEMPLATE_ID = "template_rmz7ocl";
 
 let gamesMap = {};
 let submissions = [];
@@ -49,8 +47,9 @@ function renderEvents() {
             if (searchQuery && !g.display_name.toLowerCase().includes(searchQuery)) return;
             const card = document.createElement("div");
             card.className = "library-card"; 
+            // Force image width/height in CSS, not inline here
             card.innerHTML = `
-                <img src="${g.cover_image}" onerror="this.src='https://via.placeholder.com/60?text=Game'">
+                <img src="${g.cover_image}" onerror="this.src='https://via.placeholder.com/150'">
                 <h4>${g.display_name}</h4>
                 <div class="library-overlay">
                     <p style="font-size:0.8rem; margin-bottom:8px;">No active events.</p>
@@ -100,7 +99,9 @@ document.querySelectorAll(".close-modal").forEach(btn => btn.onclick = () => {
 });
 
 window.onclick = (e) => {
-    if (e.target.classList.contains('modal')) e.target.style.display = "none";
+    if (e.target.classList.contains('modal')) {
+        e.target.style.display = "none";
+    }
 };
 
 document.getElementById("searchInput").oninput = (e) => { searchQuery = e.target.value.toLowerCase(); renderEvents(); };
