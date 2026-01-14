@@ -37,25 +37,23 @@
         <div class="tooltip-content">
           <h3>Changelog</h3>
           <ul>
-              <li><strong>v1.9:</strong> Fixed JS Freeze & Sidebar</li>
-              <li><strong>v1.8:</strong> AdSense & Privacy</li>
+              <li><strong>v1.9:</strong> Fix Layout & Grid</li>
+              <li><strong>v1.8:</strong> AdSense Setup</li>
           </ul>
           <hr style="border:0; border-top:1px solid var(--border); margin: 10px 0;">
           <a href="#" id="openPrivacy" style="color:var(--accent); font-size: 0.75rem; text-decoration: none;">Privacy Policy</a>
-          <div class="version-number">Ver: 1.9.0</div>
+          <div class="version-number">Ver: 1.9.1</div>
         </div>
       </div>
     </div>
   </header>
 
   <section class="notification-banner">
-      <div class="notify-content">
-          <div class="notify-text">
-              <i class="fa-solid fa-bell-ring"></i>
-              <span>Get notified when new events drop!</span>
-          </div>
-          <button id="openNotify" class="notify-btn-small">Notify Me</button>
+      <div class="notify-content notify-text">
+          <i class="fa-solid fa-bell-ring" style="color: var(--accent);"></i>
+          <span>Get notified when new events drop!</span>
       </div>
+      <button id="openNotify" class="notify-btn-small">Notify Me</button>
   </section>
 
   <div class="controls-container">
@@ -64,11 +62,7 @@
       <input type="text" id="searchInput" placeholder="Search games, events...">
     </div>
     <div class="sort-wrapper">
-      <select id="sortSelect">
-        <option value="soonest">Sort: Ending Soonest</option>
-        <option value="alpha">Sort: Name (A-Z)</option>
-      </select>
-    </div>
+      </div>
   </div>
 
   <div class="layout-container">
@@ -77,9 +71,9 @@
             <div class="ad-tag">SPONSORED</div>
             <div class="ad-content" id="left-ad-slot">
                 <div class="ad-placeholder-clean">
-                    <i class="fa-solid fa-rectangle-ad"></i>
-                    <p>Featured Deal</p>
-                    <button class="ad-btn-minimal">Learn More</button>
+                    <i class="fa-solid fa-fire"></i>
+                    <p style="font-size:0.9rem; margin:0;">Hot Deals</p>
+                    <button class="ad-btn-minimal">View Offers</button>
                 </div>
             </div>
         </div>
@@ -118,9 +112,9 @@
             <div class="ad-tag">RECOMMENDED</div>
             <div class="ad-content" id="right-ad-slot">
                 <div class="ad-placeholder-clean">
-                    <i class="fa-solid fa-tags"></i>
-                    <p>Gaming Sales</p>
-                    <button class="ad-btn-minimal">View Now</button>
+                    <i class="fa-solid fa-gamepad"></i>
+                    <p style="font-size:0.9rem; margin:0;">New Gear</p>
+                    <button class="ad-btn-minimal">Shop Now</button>
                 </div>
             </div>
         </div>
@@ -133,13 +127,12 @@
         <h2>Stay in the Loop</h2>
         <p>Select the games you want to track.</p>
         <form id="subscribeForm">
-            <input type="email" id="userEmail" placeholder="Enter your email address" required>
+            <input type="email" id="userEmail" placeholder="Enter your email address" required style="width:100%; padding:10px; margin-bottom:15px; border-radius:6px; border:1px solid #ccc;">
             <div class="subscription-controls">
-                <span class="sub-hint">Uncheck games to ignore</span>
-                <button type="button" id="toggleAllGames" class="text-btn">Deselect All</button>
+                <span class="sub-hint" style="font-size:0.8rem; color:#aaa;">Uncheck games to ignore</span>
             </div>
             <div id="game-subscription-list" class="game-checkbox-list"></div>
-            <button type="submit" class="subscribe-submit">Subscribe</button>
+            <button type="submit" class="notify-btn-small" style="width:100%; margin-top:15px;">Subscribe</button>
         </form>
     </div>
   </div>
@@ -152,7 +145,6 @@
             <p><strong>1. Introduction</strong><br>We value your privacy. This policy explains how we handle data when you use our Event Tracker.</p>
             <p><strong>2. Information We Collect</strong><br>When you sign up for email notifications, we collect your email address and game preferences solely to send you updates.</p>
             <p><strong>3. Cookies & Advertising</strong><br>We use Google AdSense to serve ads. Google uses cookies to serve ads based on your visit. You may opt out via Google Ad settings.</p>
-            <p><strong>4. Third-Party Links</strong><br>Our site contains affiliate and sponsored links. Clicking these may earn us a commission.</p>
         </div>
     </div>
   </div>
